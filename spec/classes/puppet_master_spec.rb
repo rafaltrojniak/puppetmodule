@@ -23,6 +23,7 @@ describe 'puppet::master', :type => :class do
                 :external_nodes         => '/usr/local/bin/puppet_node_classifier',
                 :node_terminus          => 'exec',
                 :autosign               => 'true',
+                :ca                     => 'true',
                 :certname               => 'test.example.com',
                 :storeconfigs           => 'true',
                 :storeconfigs_dbserver  => 'test.example.com',
@@ -120,6 +121,14 @@ describe 'puppet::master', :type => :class do
                 :setting => 'autosign',
                 :path    => '/etc/puppet/puppet.conf',
                 :value   => params[:autosign],
+                :require => 'File[/etc/puppet/puppet.conf]'
+            )
+            should contain_ini_setting('puppetmasterca').with(
+                :ensure  => 'present',
+                :section => 'master',
+                :setting => 'ca',
+                :path    => '/etc/puppet/puppet.conf',
+                :value   => params[:ca],
                 :require => 'File[/etc/puppet/puppet.conf]'
             )
             should contain_ini_setting('puppetmastercertname').with(

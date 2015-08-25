@@ -18,6 +18,7 @@
 #  ['storeconfigs_dbport']      - Puppetdb port
 #  ['certname']                 - The certname the puppet master should use
 #  ['autosign']                 - Auto sign agent certificates default false
+#  ['ca']                       - This master is a CA
 #  ['reporturl']                - Url to send reports to, if reporting enabled
 #  ['puppet_ssldir']            - Puppet sll directory
 #  ['puppet_docroot']           - Doc root to be configured in apache vhost
@@ -73,6 +74,7 @@ class puppet::master (
   $storeconfigs_dbport           = $::puppet::params::storeconfigs_dbport,
   $certname                      = $::fqdn,
   $autosign                      = false,
+  $ca                            = undef,
   $reporturl                     = undef,
   $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
   $puppet_docroot                = $::puppet::params::puppet_docroot,
@@ -291,6 +293,15 @@ class puppet::master (
     ensure  => present,
     setting => 'autosign',
     value   => $autosign,
+  }
+
+  if $ca != undef {
+    validate_bool(str2bool($ca))
+    ini_setting {'puppetmasterca':
+      ensure  => present,
+      setting => 'ca',
+      value   => $ca,
+    }
   }
 
   ini_setting {'puppetmastercertname':
