@@ -18,6 +18,7 @@
 #  ['storeconfigs_dbport']      - Puppetdb port
 #  ['certname']                 - The certname the puppet master should use
 #  ['autosign']                 - Auto sign agent certificates default false
+#  ['allow_duplicate_certs']    - Whether to allow a new certificate request to overwrite an existing certificate default false
 #  ['ca']                       - This master is a CA
 #  ['reporturl']                - Url to send reports to, if reporting enabled
 #  ['puppet_ssldir']            - Puppet sll directory
@@ -74,6 +75,7 @@ class puppet::master (
   $storeconfigs_dbport           = $::puppet::params::storeconfigs_dbport,
   $certname                      = $::fqdn,
   $autosign                      = false,
+  $allow_duplicate_certs         = false,
   $ca                            = undef,
   $reporturl                     = undef,
   $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
@@ -293,6 +295,12 @@ class puppet::master (
     ensure  => present,
     setting => 'autosign',
     value   => $autosign,
+  }
+
+  ini_setting {'puppetmasterallowduplicatecerts':
+    ensure  => present,
+    setting => 'allow_duplicate_certs',
+    value   => $allow_duplicate_certs,
   }
 
   if $ca != undef {
