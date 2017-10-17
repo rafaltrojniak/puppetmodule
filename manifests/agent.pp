@@ -115,6 +115,11 @@ class puppet::agent(
       gid    => $group_id,
     }
   }
+
+  if $::osfamily == 'Debian' {
+    Exec<| title == 'apt_update' |> -> Package <| tag == 'puppet::agent' |>
+  }
+
   package { $puppet_agent_package:
     ensure   => $version,
     provider => $package_provider,
