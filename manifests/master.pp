@@ -124,6 +124,9 @@ class puppet::master (
   }
 
   if $::osfamily == 'Debian'
+
+    Exec<| title == 'apt_update' |> -> Package <| tag == 'puppet::master' |>
+
   {
     package { 'puppetmaster-common':
       ensure   => $version,
