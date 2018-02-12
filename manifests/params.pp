@@ -53,9 +53,13 @@ class puppet::params {
   }
 
   # Hmmmmmm, pointless ??
-  if ${::puppet_server_major_version} {
+  if $::puppet_server_major_version {
 
-    $puppetserver = true
+    $puppet_server_service_enable = true
+
+  } else {
+
+    $puppet_server_service_enable = false
 
   }
 
