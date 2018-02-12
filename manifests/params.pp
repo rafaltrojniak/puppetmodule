@@ -52,6 +52,13 @@ class puppet::params {
 
   }
 
+  # Hmmmmmm, pointless ??
+  if ${::puppet_server_major_version} {
+
+    $puppetserver = true
+
+  }
+
   if $puppet_five_support {
     $confdir                        = '/etc/puppetlabs/puppet'
     $hiera_config                   = "${confdir}/hiera.yaml"
@@ -97,6 +104,8 @@ class puppet::params {
     'Debian': {
       $puppet_master_package        = 'puppetmaster'
       $puppet_master_service        = 'puppetmaster'
+      $puppet_server_package        = 'puppetserver'
+      $puppet_server_service        = 'puppetserver'
       $puppet_agent_service         = 'puppet'
       $puppet_agent_package         = 'puppet'
       $puppet_defaults              = '/etc/default/puppet'
