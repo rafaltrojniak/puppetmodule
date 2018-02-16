@@ -261,6 +261,8 @@ class puppet::server (
 
   # If not providing the CA - we need to change the CRL path #
   if ! $ca {
+    # TODO: Add something here to get the CRL from the CA master
+    # e.g. curl https://puppet:8140/puppet-ca/v1/certificate_revocation_list/ca
     ini_setting {'puppetmastercacrl':
       ensure  => present,
       setting => 'cacrl',
