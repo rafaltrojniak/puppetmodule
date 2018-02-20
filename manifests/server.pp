@@ -153,6 +153,16 @@ class puppet::server (
     }
   }
 
+  # Puppet auth settings #
+  file { "${confdir}/auth.conf":
+    ensure  => present,
+    owner   => $::puppet::params::puppet_user,
+    group   => $::puppet::params::puppet_group,
+    content => template("puppet/server/auth.conf.erb"),
+    require => File[$confdir],
+  }
+
+
   # Puppetserver config dirs #
   file { $puppset_server_confdir:
     ensure  => directory,
