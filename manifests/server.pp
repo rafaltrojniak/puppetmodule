@@ -22,6 +22,7 @@
 #  ['puppet_vardir']            - Vardir used by puppet
 #  ['puppet_server_package']    - Puppet server package
 #  ['puppet_server_service']    - Puppet server service
+#  ['puppet_server_service_requires'] - List of extra services that the puppet_server_service requeres - defaults to an empty list
 #  ['puppet_server_defaults']   - Puppet server service defaults
 #  ['version']                  - Version of the puppet master package to install
 #  ['dns_alt_names']            - Comma separated list of alternative DNS names
@@ -63,6 +64,7 @@ class puppet::server (
   $puppet_server_package         = $::puppet::params::puppet_server_package,
   $puppet_server_service         = $::puppet::params::puppet_server_service,
   $puppet_server_service_enable  = $::puppet::params::puppet_server_service_enable,
+  $puppet_server_service_requires = [],
   $puppet_server_defaults        = $::puppet::params::puppet_server_defaults,
   $puppet_server_confdir         = $::puppet::params::puppet_server_confdir,
   $puppet_server_conf_d          = $::puppet::params::puppet_server_conf_d,
@@ -102,12 +104,20 @@ class puppet::server (
     ensure  => $version,
   }
 
+  $_puppet_server_service_requires = unique(flatten(
+    [
+      Package[$puppet_server_package],
+      File[$puppet_conf],
+      Service[unique($puppet_server_service_requires)],
+    ]
+  ))
+
   if $puppet_server_service_enable {
 
     service { $puppet_server_service:
       ensure  => running,
       enable  => true,
-      require => [Package[$puppet_server_package],File[$puppet_conf]],
+      require => $_puppet_server_service_requires,
     }
 
   } else {
@@ -115,7 +125,7 @@ class puppet::server (
     service { $puppet_server_service:
       ensure  => stopped,
       enable  => false,
-      require => [Package[$puppet_server_package],File[$puppet_conf]],
+      require => $_puppet_server_service_requires,
     }
 
   }
