@@ -58,9 +58,9 @@ class puppet::server (
   $puppet_server_package         = $::puppet::params::puppet_server_package,
   $puppet_server_service         = $::puppet::params::puppet_server_service,
   $puppet_server_service_enable  = $::puppet::params::puppet_server_service_enable,
-  $puppset_server_confdir        = $::puppet::params::puppset_server_confdir,
-  $puppset_server_conf_d         = $::puppet::params::puppset_server_conf_d,
-  $puppset_server_services_d     = $::puppet::params::puppset_server_services_d,
+  $puppet_server_confdir         = $::puppet::params::puppet_server_confdir,
+  $puppet_server_conf_d          = $::puppet::params::puppet_server_conf_d,
+  $puppet_server_services_d      = $::puppet::params::puppet_server_services_d,
   $version                       = 'present',
   $dns_alt_names                 = ['puppet'],
   $digest_algorithm              = $::puppet::params::digest_algorithm,
@@ -157,36 +157,36 @@ class puppet::server (
 
 
   # Puppetserver config dirs #
-  file { $puppset_server_confdir:
+  file { $puppet_server_confdir:
     ensure  => directory,
     mode    => '0755',
     owner   => $::puppet::params::puppet_user,
     group   => $::puppet::params::puppet_group,
     require => Package[$puppet_server_package],
   }
-  file { $puppset_server_conf_d:
+  file { $puppet_server_conf_d:
     ensure  => directory,
     mode    => '0755',
     owner   => $::puppet::params::puppet_user,
     group   => $::puppet::params::puppet_group,
-    require => File[$puppset_server_confdir],
+    require => File[$puppet_server_confdir],
   }
-  file { $puppset_server_services_d:
+  file { $puppet_server_services_d:
     ensure  => directory,
     mode    => '0755',
     owner   => $::puppet::params::puppet_user,
     group   => $::puppet::params::puppet_group,
-    require => File[$puppset_server_confdir],
+    require => File[$puppet_server_confdir],
     notify  => Service[$puppet_server_service],
   }
 
   # CA settings are here #
-  file { "${puppset_server_services_d}/ca.cfg":
+  file { "${puppet_server_services_d}/ca.cfg":
     ensure  => present,
     owner   => $::puppet::params::puppet_user,
     group   => $::puppet::params::puppet_group,
     content => template("puppet/server/ca.cfg.erb"),
-    require => File[$puppset_server_services_d],
+    require => File[$puppet_server_services_d],
   }
 
   file { $puppet_vardir:
