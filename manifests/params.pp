@@ -110,6 +110,7 @@ class puppet::params {
       $puppet_server_confdir        = '/etc/puppetlabs/puppetserver'
       $puppet_server_conf_d         = "${puppet_server_confdir}/conf.d"
       $puppet_server_services_d     = "${puppet_server_confdir}/services.d"
+      $puppet_server_defaults       = "/etc/default/puppetserver"
 
       if $puppet_five_support {
         $puppet_vardir              = '/opt/puppetlabs/puppet/cache'

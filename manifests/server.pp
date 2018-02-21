@@ -5,6 +5,8 @@
 # Parameters:
 #  ['user_id']                  - The userid of the puppet user
 #  ['group_id']                 - The groupid of the puppet group
+#  ['puppet_user']              - The user name of the puppet user
+#  ['puppet_group']             - The group name of the puppet user
 #  ['modulepath']               - Module path to be served by the puppet master
 #  ['manifest']                 - Manifest path
 #  ['external_nodes']           - ENC script path
@@ -18,8 +20,9 @@
 #  ['puppet_ssldir']            - Puppet sll directory
 #  ['puppet_docroot']           - Doc root to be configured in apache vhost
 #  ['puppet_vardir']            - Vardir used by puppet
-#  ['puppet_server_package']    - Puppet master package
-#  ['puppet_server_service']    - Puppet master service
+#  ['puppet_server_package']    - Puppet server package
+#  ['puppet_server_service']    - Puppet server service
+#  ['puppet_server_defaults']   - Puppet server service defaults
 #  ['version']                  - Version of the puppet master package to install
 #  ['dns_alt_names']            - Comma separated list of alternative DNS names
 #  ['digest_algorithm']         - The algorithm to use for file digests.
@@ -37,8 +40,10 @@
 #
 #
 class puppet::server (
-  $user_id                       = undef,
-  $group_id                      = undef,
+  $user_id                       = $::puppet_user_uid,
+  $group_id                      = $::puppet_user_gid,
+  $puppet_user                   = $::puppet::params::puppet_user,
+  $puppet_group                  = $::puppet::params::puppet_group,
   $confdir                       = $::puppet::params::confdir,
   $puppet_conf                   = $::puppet::params::puppet_conf,
   $modulepath                    = $::puppet::params::modulepath,
@@ -58,9 +63,11 @@ class puppet::server (
   $puppet_server_package         = $::puppet::params::puppet_server_package,
   $puppet_server_service         = $::puppet::params::puppet_server_service,
   $puppet_server_service_enable  = $::puppet::params::puppet_server_service_enable,
+  $puppet_server_defaults        = $::puppet::params::puppet_server_defaults,
   $puppet_server_confdir         = $::puppet::params::puppet_server_confdir,
   $puppet_server_conf_d          = $::puppet::params::puppet_server_conf_d,
   $puppet_server_services_d      = $::puppet::params::puppet_server_services_d,
+  $java_heap                     = '-Xms1g -Xmx1g',
   $version                       = 'present',
   $dns_alt_names                 = ['puppet'],
   $digest_algorithm              = $::puppet::params::digest_algorithm,
@@ -70,16 +77,16 @@ class puppet::server (
 
   anchor { 'puppet::server::begin': }
 
-  if ! defined(User[$::puppet::params::puppet_user]) {
-    user { $::puppet::params::puppet_user:
+  if ! defined(User[$puppet_user]) {
+    user { $puppet_user:
       ensure => present,
       uid    => $user_id,
-      gid    => $::puppet::params::puppet_group,
+      gid    => $puppet_group,
     }
   }
 
-  if ! defined(Group[$::puppet::params::puppet_group]) {
-    group { $::puppet::params::puppet_group:
+  if ! defined(Group[$puppet_group]) {
+    group { $puppet_group:
       ensure => present,
       gid    => $group_id,
     }
@@ -113,13 +120,25 @@ class puppet::server (
 
   }
 
+  # Service params #
+  if $::osfamily == 'Debian' {
+    file { $puppet_server_defaults:
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      require => Package[$puppet_server_package],
+      notify  => Service[$puppet_server_service],
+      content => template("puppet/${puppet_server_defaults}.erb"),
+    }
+  }
+
   if ! defined(File[$puppet_conf]){
     file { $puppet_conf:
       ensure  => 'file',
       mode    => '0644',
       require => File[$confdir],
-      owner   => $::puppet::params::puppet_user,
-      group   => $::puppet::params::puppet_group,
+      owner   => $puppet_user,
+      group   => $puppet_group,
       notify  => Service[$puppet_server_service],
     }
   }
@@ -134,8 +153,8 @@ class puppet::server (
       ensure  => directory,
       mode    => '0755',
       require => Package[$puppet_server_package],
-      owner   => $::puppet::params::puppet_user,
-      group   => $::puppet::params::puppet_group,
+      owner   => $puppet_user,
+      group   => $puppet_group,
       notify  => Service[$puppet_server_service],
     }
   }
@@ -149,8 +168,8 @@ class puppet::server (
   # Puppet auth settings #
   file { "${confdir}/auth.conf":
     ensure  => present,
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     content => template("puppet/server/auth.conf.erb"),
     require => File[$confdir],
   }
@@ -160,22 +179,22 @@ class puppet::server (
   file { $puppet_server_confdir:
     ensure  => directory,
     mode    => '0755',
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     require => Package[$puppet_server_package],
   }
   file { $puppet_server_conf_d:
     ensure  => directory,
     mode    => '0755',
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     require => File[$puppet_server_confdir],
   }
   file { $puppet_server_services_d:
     ensure  => directory,
     mode    => '0755',
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     require => File[$puppet_server_confdir],
     notify  => Service[$puppet_server_service],
   }
@@ -183,16 +202,16 @@ class puppet::server (
   # CA settings are here #
   file { "${puppet_server_services_d}/ca.cfg":
     ensure  => present,
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     content => template("puppet/server/ca.cfg.erb"),
     require => File[$puppet_server_services_d],
   }
 
   file { $puppet_vardir:
     ensure  => directory,
-    owner   => $::puppet::params::puppet_user,
-    group   => $::puppet::params::puppet_group,
+    owner   => $puppet_user,
+    group   => $puppet_group,
     notify  => Service[$puppet_server_service],
     require => Package[$puppet_server_package]
   }
