@@ -21,14 +21,10 @@
 #  ['puppet_server_package']    - Puppet master package
 #  ['puppet_server_service']    - Puppet master service
 #  ['version']                  - Version of the puppet master package to install
-#  ['parser']                   - Which parser to use
 #  ['dns_alt_names']            - Comma separated list of alternative DNS names
 #  ['digest_algorithm']         - The algorithm to use for file digests.
-#  ['generate_ssl_certs']       - Generate ssl certs (false to disable)
 #  ['strict_variables']         - Makes the parser raise errors when referencing unknown variables
-#  ['always_cache_features']    - if false (default), always try to load a feature even if a previous load failed
-#  ['serialization_format']     - defaults to undef, otherwise it sets the preferred_serialization_format param (currently only msgpack is supported)
-#  ['serialization_package']    - defaults to undef, if provided, we install this package, otherwise we fall back to the gem from 'serialization_format'
+#  ['serialization_format']     - defaults to undef [ which means JSON/PSON ], otherwise it sets the preferred_serialization_format param (currently only msgpack is supported)
 #
 # Notes:
 #
@@ -66,13 +62,10 @@ class puppet::server (
   $puppset_server_conf_d         = $::puppet::params::puppset_server_conf_d,
   $puppset_server_services_d     = $::puppet::params::puppset_server_services_d,
   $version                       = 'present',
-  $parser                        = $::puppet::params::parser,
   $dns_alt_names                 = ['puppet'],
   $digest_algorithm              = $::puppet::params::digest_algorithm,
   $strict_variables              = undef,
-  $always_cache_features         = false,
   $serialization_format          = undef,
-  $serialization_package         = undef,
 ) inherits puppet::params {
 
   anchor { 'puppet::server::begin': }
@@ -204,6 +197,7 @@ class puppet::server (
     require => Package[$puppet_server_package]
   }
 
+  # Ini defaults #
   Ini_setting {
       path    => $puppet_conf,
       require => File[$puppet_conf],
@@ -211,18 +205,6 @@ class puppet::server (
       section => 'master',
   }
 
-
-  # FIXME: is this required ?? - leaving unset for now - this is worked out per environment anyway #
-  #ini_setting {'puppetmastermodulepath':
-  #  ensure  => $setting_config,
-  #  setting => 'modulepath',
-  #  value   => $modulepath,
-  #}
-  #ini_setting {'puppetmastermanifest':
-  #  ensure  => $setting_config,
-  #  setting => 'manifest',
-  #  value   => $manifest,
-  #`}
   ini_setting {'puppetmasterenvironmentpath':
     ensure  => $present,
     setting => 'environmentpath',
@@ -286,18 +268,6 @@ class puppet::server (
     value   => $reports,
   }
 
-  #ini_setting {'puppetmasterpluginsync':
-  #  ensure  => present,
-  #  setting => 'pluginsync',
-  #  value   => $pluginsync,
-  #}
-
-  ini_setting {'puppetmasterparser':
-    ensure  => present,
-    setting => 'parser',
-    value   => $parser,
-  }
-
   if $reporturl != undef {
     ini_setting {'puppetmasterreport':
       ensure  => present,
@@ -326,38 +296,7 @@ class puppet::server (
       value   => $strict_variables,
     }
   }
-  validate_bool(str2bool($always_cache_features))
-  ini_setting { 'puppetmasteralwayscachefeatures':
-    ensure  => present,
-    setting => 'always_cache_features',
-    value   => $always_cache_features,
-  }
   if $serialization_format != undef {
-    if $serialization_package != undef {
-      package { $serialization_package:
-        ensure  => latest,
-      }
-    } else {
-      if $serialization_format == 'msgpack' {
-        unless defined(Package[$::puppet::params::ruby_dev]) {
-          package {$::puppet::params::ruby_dev:
-            ensure  => 'latest',
-          }
-        }
-        unless defined(Package['gcc']) {
-          package {'gcc':
-            ensure  => 'latest',
-          }
-        }
-        unless defined(Package['msgpack']) {
-          package {'msgpack':
-            ensure   => 'latest',
-            provider => 'gem',
-            require  => Package[$::puppet::params::ruby_dev, 'gcc'],
-          }
-        }
-      }
-    }
     ini_setting {'puppetagentserializationformatmaster':
       setting => 'preferred_serialization_format',
       value   => $serialization_format,
