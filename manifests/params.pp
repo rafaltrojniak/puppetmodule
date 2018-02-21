@@ -107,9 +107,9 @@ class puppet::params {
       $rack_package                 = 'librack-ruby'
       $ruby_dev                     = 'ruby-dev'
       $puppet_conf                  = "${confdir}/puppet.conf"
-      $puppet_server_confdir        =  '/etc/puppetlabs/puppetserver'
-      $puppet_server_conf_d         =  "${puppet_server_confdir}/conf.d"
-      $puppet_server_services_d     =  "${puppet_server_confdir}/services.d"
+      $puppet_server_confdir        = '/etc/puppetlabs/puppetserver'
+      $puppet_server_conf_d         = "${puppet_server_confdir}/conf.d"
+      $puppet_server_services_d     = "${puppet_server_confdir}/services.d"
 
       if $puppet_five_support {
         $puppet_vardir              = '/opt/puppetlabs/puppet/cache'
