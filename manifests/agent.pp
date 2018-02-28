@@ -37,6 +37,9 @@
 #   ['serialization_package'] - defaults to undef, if provided, we install this package, otherwise we fall back to the gem from 'serialization_format'
 #   ['http_proxy_host']       - The hostname of an HTTP proxy to use for agent -> master connections
 #   ['http_proxy_port']       - The port to use when puppet uses an HTTP proxy
+#   ['agent_gems']                 - An array for gems that the puppet agent requires - managed using the puppet_gem provider - defaults to an emtpy list, so does nothing
+#   ['agent_gems_install_options'] - An array, a hash, or an array of hash that describe extra install options for the puppet_gem provider
+#
 #
 # Actions:
 # - Install and configures the puppet agent
@@ -105,6 +108,10 @@ class puppet::agent(
   $cron_minute            = undef,
   $serialization_format   = undef,
   $serialization_package  = undef,
+
+  $agent_gems                 = [],
+  $agent_gems_install_options = undef,
+
   # deprectated in puppet 5 #
   $configtimeout          = undef,
 ) inherits puppet::params {
@@ -140,6 +147,23 @@ class puppet::agent(
   package { $puppet_agent_package:
     ensure   => $version,
     provider => $package_provider,
+  }
+
+  if $puppet_five_support {
+
+    validate_legacy(Array, 'validate_array', $agent_gems)
+
+    if $agent_gems != [] {
+
+      package { $agent_gems:
+        ensure          => installed,
+        provider        => 'puppet_gem',
+        install_options => $agent_gems_install_options,
+        require         => Package[$puppet_agent_package],
+      }
+
+    }
+
   }
 
   if $puppet_run_style == 'service' {
