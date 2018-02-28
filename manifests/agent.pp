@@ -199,16 +199,16 @@ class puppet::agent(
       file {$environmentpath:
         ensure => directory,
         require => Package[$puppet_agent_package],
-        owner  => 'root',
-        group  => 'root',
+        owner   => $::puppet::params::puppet_user,
+        group   => $::puppet::params::puppet_group,
         mode   => '0755',
       }
     }
     if ! defined(File["${environmentpath}/${environment}"]) {
       file {"${environmentpath}/${environment}":
         ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
+        owner   => $::puppet::params::puppet_user,
+        group   => $::puppet::params::puppet_group,
         mode    => '0755',
         require => [Package[$puppet_agent_package],File[$environmentpath]],
       }
