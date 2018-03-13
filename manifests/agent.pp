@@ -37,6 +37,9 @@
 #   ['serialization_package'] - defaults to undef, if provided, we install this package, otherwise we fall back to the gem from 'serialization_format'
 #   ['http_proxy_host']       - The hostname of an HTTP proxy to use for agent -> master connections
 #   ['http_proxy_port']       - The port to use when puppet uses an HTTP proxy
+#   ['agent_gems']                 - An array for gems that the puppet agent requires - managed using the puppet_gem provider - defaults to an emtpy list, so does nothing
+#   ['agent_gems_install_options'] - An array, a hash, or an array of hash that describe extra install options for the puppet_gem provider
+#
 #
 # Actions:
 # - Install and configures the puppet agent
@@ -60,6 +63,11 @@ class puppet::agent(
   $user_id                = undef,
   $group_id               = undef,
   $package_provider       = $::puppet::params::package_provider,
+  $confdir                = $::puppet::params::confdir,
+  $puppet_conf            = $::puppet::params::puppet_conf,
+  $environmentpath        = $::puppet::params::environmentpath,
+
+  $puppet_five_support    = $::puppet::params::puppet_five_support,
 
   #[main]
   $templatedir            = undef,
@@ -87,7 +95,8 @@ class puppet::agent(
   $listen                 = false,
   $reportserver           = '$server',
   $digest_algorithm       = $::puppet::params::digest_algorithm,
-  $configtimeout          = '2m',
+  $http_connect_timeout   = '2m',
+  $http_read_timeout      = '2m',
   $stringify_facts        = undef,
   $verbose                = undef,
   $agent_noop             = undef,
@@ -99,7 +108,22 @@ class puppet::agent(
   $cron_minute            = undef,
   $serialization_format   = undef,
   $serialization_package  = undef,
+
+  $agent_gems                 = [],
+  $agent_gems_install_options = undef,
+
+  # deprectated in puppet 5 #
+  $configtimeout          = undef,
 ) inherits puppet::params {
+
+
+  # Deprecated warnings #
+  if $configtimeout {
+    notify {'puppet config option "configtimeout" is deprecated and will be ignored. Consider "http_connect_timeout" and "http_read_timeout" instead':
+      loglevel => 'warning',
+    }
+  }
+
 
   if ! defined(User[$::puppet::params::puppet_user]) {
     user { $::puppet::params::puppet_user:
@@ -125,6 +149,23 @@ class puppet::agent(
     provider => $package_provider,
   }
 
+  if $puppet_five_support {
+
+    validate_legacy(Array, 'validate_array', $agent_gems)
+
+    if $agent_gems != [] {
+
+      package { $agent_gems:
+        ensure          => installed,
+        provider        => 'puppet_gem',
+        install_options => $agent_gems_install_options,
+        require         => Package[$puppet_agent_package],
+      }
+
+    }
+
+  }
+
   if $puppet_run_style == 'service' {
     $startonboot = 'yes'
   }
@@ -142,13 +183,35 @@ class puppet::agent(
     }
   }
 
-  if ! defined(File[$::puppet::params::confdir]) {
-    file { $::puppet::params::confdir:
+  if ! defined(File[$confdir]) {
+    file { $confdir:
       ensure  => directory,
       require => Package[$puppet_agent_package],
       owner   => $::puppet::params::puppet_user,
       group   => $::puppet::params::puppet_group,
       mode    => '0655',
+    }
+  }
+
+  if $puppet_five_support {
+    # Even tough the catalogue compiles fine without this - it stops the agent throwing a node definition error [ at least on puppet-agent 5.3.4 ] #
+    if ! defined(File[$environmentpath]) {
+      file {$environmentpath:
+        ensure => directory,
+        require => Package[$puppet_agent_package],
+        owner   => $::puppet::params::puppet_user,
+        group   => $::puppet::params::puppet_group,
+        mode   => '0755',
+      }
+    }
+    if ! defined(File["${environmentpath}/${environment}"]) {
+      file {"${environmentpath}/${environment}":
+        ensure  => directory,
+        owner   => $::puppet::params::puppet_user,
+        group   => $::puppet::params::puppet_group,
+        mode    => '0755',
+        require => [Package[$puppet_agent_package],File[$environmentpath]],
+      }
     }
   }
 
@@ -200,23 +263,23 @@ class puppet::agent(
       enable     => $service_enable,
       hasstatus  => true,
       hasrestart => true,
-      subscribe  => [File[$::puppet::params::puppet_conf], File[$::puppet::params::confdir]],
+      subscribe  => [File[$puppet_conf], File[$confdir]],
       require    => Package[$puppet_agent_package],
     }
   }
 
-  if ! defined(File[$::puppet::params::puppet_conf]) {
-      file { $::puppet::params::puppet_conf:
+  if ! defined(File[$puppet_conf]) {
+      file { $puppet_conf:
         ensure  => 'file',
         mode    => '0644',
-        require => File[$::puppet::params::confdir],
+        require => File[$confdir],
         owner   => $::puppet::params::puppet_user,
         group   => $::puppet::params::puppet_group,
       }
     }
     else {
       if $puppet_run_style == 'service' {
-        File<| title == $::puppet::params::puppet_conf |> {
+        File<| title == $puppet_conf |> {
           notify  +> Service[$puppet_agent_service],
         }
       }
@@ -226,8 +289,8 @@ class puppet::agent(
   $runinterval = $puppet_run_interval * 60
 
   Ini_setting {
-      path    => $::puppet::params::puppet_conf,
-      require => File[$::puppet::params::puppet_conf],
+      path    => $puppet_conf,
+      require => File[$puppet_conf],
       section => 'agent',
       ensure  => present,
   }
@@ -249,6 +312,12 @@ class puppet::agent(
       ensure  => absent,
       setting => 'srv_domain',
     }
+  }
+
+  ini_setting {'puppetagentenvironmentpath':
+    setting => 'environmentpath',
+    section => 'main',
+    value   => $environmentpath,
   }
 
   if $ordering != undef
@@ -319,9 +388,11 @@ class puppet::agent(
     setting => 'report',
     value   => $report,
   }
-  ini_setting {'puppetagentpluginsync':
-    setting => 'pluginsync',
-    value   => $pluginsync,
+  if ! $puppet_five_support {
+    ini_setting {'puppetagentpluginsync':
+      setting => 'pluginsync',
+      value   => $pluginsync,
+    }
   }
   ini_setting {'puppetagentlisten':
     setting => 'listen',
@@ -351,9 +422,24 @@ class puppet::agent(
       section => 'main',
     }
   }
-  ini_setting {'puppetagentconfigtimeout':
-    setting => 'configtimeout',
-    value   => $configtimeout,
+  if $puppet_five_support {
+    ini_setting {'puppetagentconfigtimeout':
+      ensure  => absent,
+      setting => 'configtimeout',
+    }
+    ini_setting {'puppetagenthttp_connect_timeout':
+      setting => 'http_connect_timeout',
+      value   => $http_connect_timeout,
+    }
+    ini_setting {'puppetagenthttp_read_timeout':
+      setting => 'http_read_timeout',
+      value   => $http_read_timeout,
+    }
+  } else {
+    ini_setting {'puppetagentconfigtimeout':
+      setting => 'configtimeout',
+      value   => $configtimeout,
+    }
   }
   if $stringify_facts != undef {
     ini_setting {'puppetagentstringifyfacts':

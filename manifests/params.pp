@@ -13,15 +13,11 @@
 class puppet::params {
 
   $puppet_server                    = 'puppet'
-  $modulepath                       = '/etc/puppet/modules'
   $puppet_user                      = 'puppet'
   $puppet_group                     = 'puppet'
   $storeconfigs_dbserver            = $::fqdn
   $storeconfigs_dbport              = '8081'
   $certname                         = $::fqdn
-  $confdir                          = '/etc/puppet'
-  $manifest                         = '/etc/puppet/manifests/site.pp'
-  $hiera_config                     = '/etc/puppet/hiera.yaml'
   $puppet_docroot                   = '/etc/puppet/rack/public/'
   $puppet_passenger_port            = '8140'
   $puppet_server_port               = '8140'
@@ -29,17 +25,50 @@ class puppet::params {
   $apache_serveradmin               = 'root'
   $parser                           = 'current'
   $puppetdb_strict_validation       = true
-  $environments                     = 'config'
   $digest_algorithm                 = 'md5'
   $puppet_run_interval              = 30
   $classfile                        = '$statedir/classes.txt'
   $package_provider                 = undef # falls back to system default
+  $puppet_server_service_enable     = true
 
   $puppet_passenger_ssl_protocol    = 'TLSv1.2'
   $puppet_passenger_ssl_cipher      = 'AES256+EECDH:AES256+EDH'
 
-  # Only used when environments == directory
-  $environmentpath                  = "${confdir}/environments"
+
+  # Puppet 5 #
+
+  $puppet_five_upgrade = hiera(warehouse_common::pup::agent_upgrade, false)
+
+  if ( versioncmp("${::puppet_agent_major_version}", '5') < 0 ) {
+
+    if $puppet_five_upgrade {
+      $puppet_five_support = true
+    } else {
+      $puppet_five_support = false
+    }
+
+  } else {
+
+    $puppet_five_support = true
+
+  }
+
+  if $puppet_five_support {
+    $confdir                        = '/etc/puppetlabs/puppet'
+    $hiera_config                   = "${confdir}/hiera.yaml"
+    $codedir                        = '/etc/puppetlabs/code'
+    $modulepath                     = "${codedir}/modules"
+    $manifest                       = "${codedir}/manifests"
+    $environmentpath                = "${codedir}/environments"
+  } else {
+    $confdir                        = '/etc/puppet'
+    $hiera_config                   = '/etc/puppet/hiera.yaml'
+    $modulepath                     = '/etc/puppet/modules'
+    $manifest                       = '/etc/puppet/manifests/site.pp'
+    $environments                   = 'config'
+    # Only used when environments == directory
+    $environmentpath                = "${confdir}/environments"
+  }
 
   case $::osfamily {
     'RedHat': {
@@ -69,15 +98,28 @@ class puppet::params {
     'Debian': {
       $puppet_master_package        = 'puppetmaster'
       $puppet_master_service        = 'puppetmaster'
+      $puppet_server_package        = 'puppetserver'
+      $puppet_server_service        = 'puppetserver'
       $puppet_agent_service         = 'puppet'
       $puppet_agent_package         = 'puppet'
       $puppet_defaults              = '/etc/default/puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/var/lib/puppet/ssl'
       $passenger_package            = 'libapache2-mod-passenger'
       $rack_package                 = 'librack-ruby'
       $ruby_dev                     = 'ruby-dev'
+      $puppet_conf                  = "${confdir}/puppet.conf"
+      $puppet_server_confdir        = '/etc/puppetlabs/puppetserver'
+      $puppet_server_conf_d         = "${puppet_server_confdir}/conf.d"
+      $puppet_server_services_d     = "${puppet_server_confdir}/services.d"
+      $puppet_server_defaults       = "/etc/default/puppetserver"
+
+      if $puppet_five_support {
+        $puppet_vardir              = '/opt/puppetlabs/puppet/cache'
+        $puppet_ssldir              = '/etc/puppetlabs/puppet/ssl'
+      } else {
+        $puppet_vardir              = '/var/lib/puppet'
+        $puppet_ssldir              = '/var/lib/puppet/ssl'
+      }
+
     }
     'FreeBSD': {
       $puppet_agent_service         = 'puppet'
