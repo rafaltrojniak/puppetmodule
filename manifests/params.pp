@@ -70,6 +70,18 @@ class puppet::params {
     $environmentpath                = "${confdir}/environments"
   }
 
+  # Mcollective #
+
+  $mcollective_etcdir               = '/etc/puppetlabs/mcollective'
+  $mcollective_libdir               = '/opt/puppetlabs/mcollective/plugins'
+  $mcollective_logfile              = '/var/log/puppetlabs/mcollective/mcollective.log'
+  $mcollective_classesfile          = '/opt/puppetlabs/puppet/cache/state/classes.txt'
+
+  $mcollective_service_name         = 'mcollective'
+
+
+  # Distro specific #
+
   case $::osfamily {
     'RedHat': {
       $puppet_master_package        = 'puppet-server'
