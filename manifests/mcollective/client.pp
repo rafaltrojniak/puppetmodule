@@ -127,7 +127,7 @@ inherits mcollective {
   #}
 
   # Management of SSL keys
-  if( $mcollective::security_provider == 'ssl' ) {
+  if( $security_provider == 'ssl' ) {
     # Ensure the package is installed before we create this directory
     Package[$package] -> File["${etcdir}/ssl"]
 

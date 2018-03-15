@@ -133,14 +133,14 @@ class puppet::mcollective (
   }
 
   # ensure the ssl directory exists for the lient and server modules
-  if( ( $mcollective::security_provider == 'aes_security' ) or ( $mcollective::security_provider == 'ssl' ) ) {
+  if( ( $security_provider == 'aes_security' ) or ( $security_provider == 'ssl' ) ) {
     file { "${etcdir}/ssl":
       ensure => directory,
       owner  => 0,
       group  => 0,
       mode   => '0555',
     }
-    if( $mcollective::security_provider == 'ssl' ) {
+    if( $security_provider == 'ssl' ) {
       file { "${etcdir}/ssl/server":
         ensure => directory,
         owner  => 0,
