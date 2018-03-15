@@ -3,7 +3,7 @@ libdir = <%= @libdir %>
 direct_addressing = 1
 <% if ( @collectives ) then -%>
 main_collective = <%= @collectives[0] %>
-collectives = <%= @collectives.join(',') %>                                                                                                                                           
+collectives = <%= @collectives.join(',') %>
 <% end -%>
 
 connector = <%= @connector %>
@@ -30,7 +30,7 @@ plugin.<%= @connector -%>.pool.<%= index+1 -%>.ssl.key = <%= @ssldir -%>/private
 plugin.<%= @connector -%>.pool.<%= index+1 -%>.ssl.cert = <%= @ssldir -%>/certs/<%= scope['::clientcert'] -%>.pem
 plugin.<%= @connector -%>.pool.<%= index+1 -%>.ssl.ca = <%= @ssldir -%>/certs/ca.pem
 <% else -%>
-plugin.<%= @connector -%>.pool.<%= index+1 -%>.ssl.fallback = true                          
+plugin.<%= @connector -%>.pool.<%= index+1 -%>.ssl.fallback = true
 <% end -%>
 <% end -%>
 
@@ -53,7 +53,7 @@ plugin.ssl_client_private = <%= @ssl_private_key %>
 securityprovider = aes_security
 <% end -%>
 
-# Discovery 
+# Discovery
 default_discovery_method = <%= @disc_method %>
 <% if ( @da_threshold != '' ) then -%>
 direct_addressing_threshold = <%= @da_threshold %>

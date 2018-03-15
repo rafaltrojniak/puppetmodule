@@ -5,7 +5,7 @@ daemonize = 1
 direct_addressing = 1
 <% if( @collectives ) then -%>
 main_collective = <%= @collectives[0] %>
-collectives = <%= @collectives.join(',') %>                                                                                                                               
+collectives = <%= @collectives.join(',') %>
 <% end -%>
 identity = <%= @fqdn %>
 
@@ -46,11 +46,11 @@ registerinterval = <%= @registerinterval %>
 <% if( @security_provider == 'psk' ) then -%>
 securityprovider = psk
 plugin.psk = <%= @psk_key %>
-<% elsif( @security_provider == 'sshkey' ) then -%>                                                                                                                                           
+<% elsif( @security_provider == 'sshkey' ) then -%>
 securityprovider = sshkey
 <% if( @sshkey_authorized_keys ) then -%>
 plugin.sshkey.server.known_hosts = <%= @sshkey_authorized_keys %>
-<% end -%> 
+<% end -%>
 <% elsif( @security_provider == 'ssl' ) then -%>
 securityprovider = ssl
 plugin.ssl_server_private = <%= @etcdir -%>/ssl/server/private.pem
@@ -109,4 +109,4 @@ keeplogs = <%= @keeplogs %>
 <% if( @max_log_size ) then -%>
 max_log_size = <%= @max_log_size %>
 <% end -%>
-<% end -%> 
+<% end -%>
