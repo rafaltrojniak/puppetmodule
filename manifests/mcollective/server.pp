@@ -102,8 +102,7 @@ class puppet::mcollective::server (
 
   Optional[String]                                  $site_module                    = $::puppet::mcollective::site_module,
 
-)
-  inherits puppet::mcollective {
+) inherits puppet::mcollective {
 
 
   # Ensure the facts cronjob is set up or removed
@@ -163,8 +162,6 @@ class puppet::mcollective::server (
     }
   }
 
-  #FIXME: got rid of this poliocy auth stuff - double check if needed.:# Policies used by the authorization plugins
-
   # Now start the daemon
   service { $service:
     ensure  => $ensure,
@@ -187,4 +184,5 @@ class puppet::mcollective::server (
       mail          => false,
     }
   }
+
 }

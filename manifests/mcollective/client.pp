@@ -94,12 +94,7 @@ class puppet::mcollective::client (
   Optional[String]                                  $disc_options                   = undef,
   String                                            $da_threshold                   = '10',
 
-)
-inherits mcollective {
-
-
-
-  # FIXME: Add requries to config files #
+) inherits mcollective {
 
 
   file { "${etcdir}/client.cfg":
@@ -111,21 +106,6 @@ inherits mcollective {
     require => Package[ $package ],
   }
 
-  ## Handle all per-user configurations
-  #$userdefaults  = { group => 'root' }
-  #$userlist  = hiera_hash( 'puppet::mcollective::userconfigs', false )
-  #if is_hash( $userlist ) {
-  #  create_resources( mcollective::userconfig, $userlist, $userdefaults )
-  #}
-
-  # FIXME: This may not be needed with puppet_agent packaging - needs checking...
-  ## Load in all the appropriate mcollective client plugins
-  #$defaults  = { version => 'present' }
-  #$clients  = hiera_hash( 'puppet::mcollective::plugin::clients', false )
-  #if is_hash( $clients ) {
-  #  create_resources( mcollective::plugin::client, $clients, $defaults )
-  #}
-
   # Management of SSL keys
   if( $security_provider == 'ssl' ) {
     # Ensure the package is installed before we create this directory
@@ -134,4 +114,5 @@ inherits mcollective {
     # copy the server public keys to all servers
     realize File["${etcdir}/ssl/server/public.pem"]
   }
+
 }

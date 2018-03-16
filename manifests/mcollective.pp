@@ -114,8 +114,7 @@ class puppet::mcollective (
   # Optional files distribution
   Optional[String]                                  $site_module                    = undef,
 
-)
-  inherits puppet::params {
+) inherits puppet::params {
 
 
   # Make sure puppet_agent >= 5 is instaleed #
@@ -162,6 +161,5 @@ class puppet::mcollective (
       }
     }
   }
-
 
 }

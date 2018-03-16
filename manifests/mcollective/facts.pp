@@ -2,10 +2,6 @@
 #
 # This module installs a cron script that puts Puppet facts in a file for MCollective to use
 #
-# === Example
-#
-# Hiera:
-#   mcollective::facts::cronjob::run_every: 15   # every quarter hour
 #
 class puppet::mcollective::facts (
   $run_every = 'unknown',
@@ -35,4 +31,5 @@ inherits puppet::mcollective {
     minute      => $minute,
     environment => 'PATH=/bin:/usr/bin:/usr/sbin:/opt/puppetlabs/bin',
   }
+
 }
