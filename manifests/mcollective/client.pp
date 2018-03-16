@@ -75,7 +75,7 @@ class puppet::mcollective::client (
   Enum['activemq', 'rabbitmq']                      $connector                      = $::puppet::mcollective::connector,
   Boolean                                           $connector_ssl                  = $::puppet::mcollective::connector_ssl,
   String                                            $connector_ssl_type             = $::puppet::mcollective::connector_ssl_type,
-  String                                            $port                           = $::puppet::mcollective::_port,
+  Integer                                           $port                           = $::puppet::mcollective::_port,
   Boolean                                           $activemq_base64                = $::puppet::mcollective::activemq_base64,
 
   # SSH know hosts #
