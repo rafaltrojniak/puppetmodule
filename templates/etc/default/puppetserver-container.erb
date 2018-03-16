@@ -1,0 +1,16 @@
+###############################################
+###############################################
+##                                           ##
+## File controlled by Puppet Module puppet   ##
+## Any changes you make will be overwritten. ##
+##                                           ##
+###############################################
+###############################################
+
+PUPPETSERVER_HOST=<%= @certname %>
+
+PUPPET_USERID=<%= @user_id %>
+PUPPET_GROUPID=<%= @group_id %>
+
+PUPPETSERVER_JAVA_ARGS="<%= @java_heap %>"
+

@@ -1,0 +1,14 @@
+#########################################################
+# This file is managed by puppet - changes will be lost #
+#########################################################
+
+<% if @ca -%>
+# To enable the CA service, you need this line
+puppetlabs.services.ca.certificate-authority-service/certificate-authority-service
+<% else -%>
+# To disable the CA service, you need this line
+puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service
+<% end -%>
+
+puppetlabs.trapperkeeper.services.watcher.filesystem-watch-service/filesystem-watch-service
+
