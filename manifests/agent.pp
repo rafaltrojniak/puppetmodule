@@ -149,6 +149,18 @@ class puppet::agent(
     provider => $package_provider,
   }
 
+  # Compatibility #
+  if $puppet_five_support {
+
+    file {'/usr/bin/puppet':
+      ensure  => link,
+      target  => '/opt/puppetlabs/bin/puppet',
+      replace => true,
+      require => Package[$puppet_agent_package],
+    }
+
+  }
+
   if $puppet_five_support {
 
     validate_legacy(Array, 'validate_array', $agent_gems)
