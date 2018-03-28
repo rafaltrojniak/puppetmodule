@@ -5,6 +5,7 @@
 #
 class puppet::mcollective::facts (
   $run_every = 'unknown',
+  $legacy    = true,
 )
 inherits puppet::mcollective {
 
@@ -25,11 +26,23 @@ inherits puppet::mcollective {
   # shorten for ease of use
   $yamlfile = "${::puppet::mcollective::etcdir}/facts.yaml"
 
+
+  if $legacy {
+    $_legacy = '--show-legacy'
+  } else {
+    $_legacy = ''
+  }
+
+  if $::puppet_agent_installed {
+    $facter_cmd = "/opt/puppetlabs/bin/facter --puppet ${_legacy} --yaml"
+  } else {
+    $facter_cmd = '/usr/bin/facter --puppet --yaml'
+  }
+
   cron { 'mcollective-facts':
     ensure      => $enable,
-    command     => "facter --puppet --yaml 2>/dev/null > ${yamlfile}.new && ! diff -q ${yamlfile}.new ${yamlfile} >/dev/null 2>&1 && mv ${yamlfile}.new ${yamlfile} >/dev/null 2>&1",
+    command     => "${facter_cmd} 2>/dev/null > ${yamlfile}.new && ! diff -q ${yamlfile}.new ${yamlfile} >/dev/null 2>&1 && mv ${yamlfile}.new ${yamlfile} >/dev/null 2>&1",
     minute      => $minute,
-    environment => 'PATH=/bin:/usr/bin:/usr/sbin:/opt/puppetlabs/bin',
   }
 
 }
