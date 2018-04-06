@@ -94,7 +94,7 @@ class puppet::mcollective::client (
   Optional[String]                                  $disc_options                   = undef,
   String                                            $da_threshold                   = '10',
 
-) inherits mcollective {
+) inherits puppet::mcollective {
 
 
   file { "${etcdir}/client.cfg":
