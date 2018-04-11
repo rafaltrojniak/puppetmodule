@@ -190,14 +190,14 @@ class puppet::agent(
       if $local_ssl_certs_trust {
 
 
-        file {'/var/tmp/local_ssl_certs.signature':
+        file {'/opt/puppetlabs/puppet/ssl/local_ssl_certs.signature':
           ensure  => present,
           owner   => 'root',
           group   => 'root',
           mode    => '0400',
-          content => tree_hash_signature('/usr/local/share/ca-certificates', 'md5'),
+          content => template("puppet/local_ssl_certs.signature.erb"),
           notify  => Exec['local_ssl_certs_trust'],
-          require => Package[ca-certificates],
+          require => [Package[$puppet_agent_package],Package[ca-certificates]],
        }
 
         exec{'local_ssl_certs_trust':
