@@ -37,6 +37,7 @@
 #   ['serialization_package'] - defaults to undef, if provided, we install this package, otherwise we fall back to the gem from 'serialization_format'
 #   ['http_proxy_host']       - The hostname of an HTTP proxy to use for agent -> master connections
 #   ['http_proxy_port']       - The port to use when puppet uses an HTTP proxy
+#   ['local_ssl_certs_trust'] - Add any locally installed CAs for SSL trust to the agent - puppet 5 and onwards only
 #   ['agent_gems']                 - An array for gems that the puppet agent requires - managed using the puppet_gem provider - defaults to an emtpy list, so does nothing
 #   ['agent_gems_install_options'] - An array, a hash, or an array of hash that describe extra install options for the puppet_gem provider
 #
@@ -109,6 +110,8 @@ class puppet::agent(
   $serialization_format   = undef,
   $serialization_package  = undef,
 
+  $local_ssl_certs_trust  = true,
+
   $agent_gems                 = [],
   $agent_gems_install_options = undef,
 
@@ -172,6 +175,37 @@ class puppet::agent(
         provider        => 'puppet_gem',
         install_options => $agent_gems_install_options,
         require         => Package[$puppet_agent_package],
+      }
+
+    }
+
+  }
+
+  # Install local CAs into agent ssl store for trust
+  if $puppet_five_support {
+
+    # Only supperted on Debian-like atm
+    if $::osfamily == 'Debian' {
+
+      if $local_ssl_certs_trust {
+
+
+        file {'/var/tmp/local_ssl_certs.signature':
+          ensure  => present,
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0400',
+          content => tree_hash_signature('/usr/local/share/ca-certificates', 'md5'),
+          notify  => Exec['local_ssl_certs_trust'],
+          require => Package[ca-certificates],
+       }
+
+        exec{'local_ssl_certs_trust':
+          command => "/usr/sbin/update-ca-certificates --certsconf /dev/null --localcertsdir /usr/local/share/ca-certificates --etccertsdir /opt/puppetlabs/puppet/ssl/certs",
+          refreshonly => true,
+          provider    => shell,
+        }
+
       }
 
     }
