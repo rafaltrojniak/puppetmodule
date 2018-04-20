@@ -16,6 +16,7 @@
 #  ['certname']                 - The certname the puppet master should use
 #  ['autosign']                 - Auto sign agent certificates default false
 #  ['ca']                       - This master is a CA
+#  ['ca_ttl']                   - Cert expirery ttl - defaulting to 10 years [ 315360000 secs ]
 #  ['reporturl']                - Url to send reports to, if reporting enabled
 #  ['puppet_ssldir']            - Puppet sll directory
 #  ['puppet_docroot']           - Doc root to be configured in apache vhost
@@ -57,6 +58,7 @@ class puppet::server (
   $certname                      = $::fqdn,
   $autosign                      = false,
   $ca                            = false,
+  $ca_ttl                        = '315360000',
   $reporturl                     = undef,
   $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
   $puppet_docroot                = $::puppet::params::puppet_docroot,
@@ -266,6 +268,12 @@ class puppet::server (
     ensure  => present,
     setting => 'hiera_config',
     value   => $hiera_config,
+  }
+
+  ini_setting {'puppetmastercattl':
+    ensure  => present,
+    setting => 'ca_ttl',
+    value   => $ca_ttl,
   }
 
   ini_setting {'puppetmasterautosign':
