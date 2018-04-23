@@ -10,9 +10,7 @@ Facter.add("local_cert_signatures") do
     Find.find('/usr/local/share/ca-certificates') do |file_path|
       if File.file?(file_path)
         if not file_path.end_with?('puppet-ca.crt')
-          file_hash  = Digest::MD5.hexdigest(File.read(file_path)) + ' ' + file_path
           md_hash[Digest::MD5.hexdigest(File.read(file_path))] = file_path
-          puts file_hash
         end
       end
     end
