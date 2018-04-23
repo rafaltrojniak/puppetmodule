@@ -1,4 +1,6 @@
 <% md_hash = scope['::local_cert_signatures'] -%>
-<% md_hash.each do | hash, file | -%>
+<% if md_hash -%>
+<%   md_hash.each do | hash, file | -%>
 <%= hash %> <%= file %>
+<%   end -%>
 <% end -%>
