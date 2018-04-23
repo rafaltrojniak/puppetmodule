@@ -2,7 +2,9 @@
 <% require 'digest/md5' -%>
 <% Find.find('/usr/local/share/ca-certificates') do |file_path| -%>
 <%   if File.file?(file_path) -%>
-<%     file_hash  = Digest::MD5.hexdigest(File.read(file_path)) + ' ' + file_path %>
+<%     if not file_path.end_with?('puppet-ca.crt') -%>
+<%       file_hash  = Digest::MD5.hexdigest(File.read(file_path)) + ' ' + file_path %>
 <%= file_hash %>
+<%     end -%>
 <%   end -%>
 <% end -%>
