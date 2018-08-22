@@ -1,0 +1,6 @@
+<% sorted_mounts = @file_server_mounts.sort_by { |mount| mount['name'] } -%>
+<% sorted_mounts.each do |mount| -%>
+[<%= mount['name'] %>]
+    path mount['path']
+    allow *
+<% end -%>
