@@ -78,7 +78,7 @@ class puppet::server (
   $digest_algorithm              = $::puppet::params::digest_algorithm,
   $strict_variables              = undef,
   $serialization_format          = undef,
-  Optional[ Array [Hash [Enum['name'], Enum['path'], Optional[ Enum['desc'] ]]]]   $file_server_mounts = undef,
+  Optional[ Array[ Struct[ { name => String , path => String , Optional[desc] => String } ]]]   $file_server_mounts = undef,
 ) inherits puppet::params {
 
   anchor { 'puppet::server::begin': }
