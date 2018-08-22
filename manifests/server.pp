@@ -30,6 +30,7 @@
 #  ['digest_algorithm']         - The algorithm to use for file digests.
 #  ['strict_variables']         - Makes the parser raise errors when referencing unknown variables
 #  ['serialization_format']     - defaults to undef [ which means JSON/PSON ], otherwise it sets the preferred_serialization_format param (currently only msgpack is supported)
+#  ['file_server_mounts']       - A n array of hashes describing puppet file server mounts, hashes must include keys, 'name', 'path, and optionally 'desc'. Defaults to undef, which removes config.
 #
 # Notes:
 #
@@ -77,6 +78,7 @@ class puppet::server (
   $digest_algorithm              = $::puppet::params::digest_algorithm,
   $strict_variables              = undef,
   $serialization_format          = undef,
+  Optional[ Array[ Struct[ { name => String , path => String , Optional[desc] => String } ]]]   $file_server_mounts = undef,
 ) inherits puppet::params {
 
   anchor { 'puppet::server::begin': }
@@ -177,6 +179,7 @@ class puppet::server (
     }
   }
 
+  # This is no longer used - it's a legacy config file and is ignored #
   # Puppet auth settings #
   file { "${confdir}/auth.conf":
     ensure  => present,
@@ -218,6 +221,27 @@ class puppet::server (
     group   => $puppet_group,
     content => template("puppet/server/ca.cfg.erb"),
     require => File[$puppet_server_services_d],
+  }
+
+  # File server mounts #
+  if $file_server_mounts {
+
+    file {"${confdir}/fileserver.conf":
+      ensure  => present,
+      mode    => '0640',
+      owner   => $puppet_user,
+      group   => $puppet_group,
+      content => template("puppet/server/fileserver.conf.erb"),
+      notify  => Service[$puppet_server_service],
+    }
+
+  } else {
+
+    file {"${confdir}/fileserver.conf":
+      ensure  => absent,
+      notify  => Service[$puppet_server_service],
+    }
+
   }
 
   file { $puppet_vardir:
