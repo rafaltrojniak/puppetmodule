@@ -134,62 +134,53 @@ class puppet::agent(
   }
 
   # Compatibility #
-  if $puppet_five_support {
-
-    file {'/usr/bin/puppet':
-      ensure  => link,
-      target  => '/opt/puppetlabs/bin/puppet',
-      replace => true,
-      require => Package[$puppet_agent_package],
-    }
-
+  file {'/usr/bin/puppet':
+    ensure  => link,
+    target  => '/opt/puppetlabs/bin/puppet',
+    replace => true,
+    require => Package[$puppet_agent_package],
   }
 
-  if $puppet_five_support {
 
-    if $agent_gems != [] {
+  # Agent Gems #
+  if $agent_gems != [] {
 
-      package { $agent_gems:
-        ensure          => installed,
-        provider        => 'puppet_gem',
-        install_options => $agent_gems_install_options,
-        require         => Package[$puppet_agent_package],
-      }
-
+    package { $agent_gems:
+      ensure          => installed,
+      provider        => 'puppet_gem',
+      install_options => $agent_gems_install_options,
+      require         => Package[$puppet_agent_package],
     }
 
   }
 
   # Install local CAs into agent ssl store for trust
-  if $puppet_five_support {
+  # Only supperted on Debian-like atm
+  if $::osfamily == 'Debian' {
 
-    # Only supperted on Debian-like atm
-    if $::osfamily == 'Debian' {
-
-      if $local_ssl_certs_trust {
+    if $local_ssl_certs_trust {
 
 
-        file {'/opt/puppetlabs/puppet/ssl/local_ssl_certs.signature':
-          ensure  => present,
-          owner   => 'root',
-          group   => 'root',
-          mode    => '0400',
-          content => template("puppet/local_ssl_certs.signature.erb"),
-          notify  => Exec['local_ssl_certs_trust'],
-          require => [Package[$puppet_agent_package],Package[ca-certificates]],
-       }
+      file {'/opt/puppetlabs/puppet/ssl/local_ssl_certs.signature':
+        ensure  => present,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0400',
+        content => template("puppet/local_ssl_certs.signature.erb"),
+        notify  => Exec['local_ssl_certs_trust'],
+        require => [Package[$puppet_agent_package],Package[ca-certificates]],
+     }
 
-        exec{'local_ssl_certs_trust':
-          command => "/usr/sbin/update-ca-certificates --certsconf /dev/null --localcertsdir /usr/local/share/ca-certificates --etccertsdir /opt/puppetlabs/puppet/ssl/certs",
-          refreshonly => true,
-          provider    => shell,
-        }
-
+      exec{'local_ssl_certs_trust':
+        command => "/usr/sbin/update-ca-certificates --certsconf /dev/null --localcertsdir /usr/local/share/ca-certificates --etccertsdir /opt/puppetlabs/puppet/ssl/certs",
+        refreshonly => true,
+        provider    => shell,
       }
 
     }
 
   }
+
 
   if $puppet_run_style == 'service' {
     $startonboot = 'yes'
@@ -218,25 +209,23 @@ class puppet::agent(
     }
   }
 
-  if $puppet_five_support {
-    # Even tough the catalogue compiles fine without this - it stops the agent throwing a node definition error [ at least on puppet-agent 5.3.4 ] #
-    if ! defined(File[$environmentpath]) {
-      file {$environmentpath:
-        ensure => directory,
-        require => Package[$puppet_agent_package],
-        owner   => $::puppet::params::puppet_user,
-        group   => $::puppet::params::puppet_group,
-        mode   => '0755',
-      }
+  # Even tough the catalogue compiles fine without this - it stops the agent throwing a node definition error [ at least on puppet-agent 5.3.4 ] #
+  if ! defined(File[$environmentpath]) {
+    file {$environmentpath:
+      ensure => directory,
+      require => Package[$puppet_agent_package],
+      owner   => $::puppet::params::puppet_user,
+      group   => $::puppet::params::puppet_group,
+      mode   => '0755',
     }
-    if ! defined(File["${environmentpath}/${environment}"]) {
-      file {"${environmentpath}/${environment}":
-        ensure  => directory,
-        owner   => $::puppet::params::puppet_user,
-        group   => $::puppet::params::puppet_group,
-        mode    => '0755',
-        require => [Package[$puppet_agent_package],File[$environmentpath]],
-      }
+  }
+  if ! defined(File["${environmentpath}/${environment}"]) {
+    file {"${environmentpath}/${environment}":
+      ensure  => directory,
+      owner   => $::puppet::params::puppet_user,
+      group   => $::puppet::params::puppet_group,
+      mode    => '0755',
+      require => [Package[$puppet_agent_package],File[$environmentpath]],
     }
   }
 
