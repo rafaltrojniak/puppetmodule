@@ -19,11 +19,11 @@
 #   }
 #
 define  puppet::masterenv (
-  $modulepath,
-  $manifest,
-  $puppet_conf = $::puppet::params::puppet_conf,
-  $environments = $::puppet::master::environments,
-  $environmentpath = $::puppet::master::environmentpath
+  String   $modulepath,
+  String   $manifest,
+  String   $puppet_conf     = $::puppet::params::puppet_conf,
+  String   $environments    = $::puppet::master::environments,
+  String   $environmentpath = $::puppet::master::environmentpath,
 ) {
 
   case $environments {
