@@ -20,7 +20,6 @@
 #   ['logdir']                - The directory in which to store log files
 #   ['environment']           - The environment of the puppet agent
 #   ['report']                - Whether to return reports
-#   ['pluginsync']            - Whethere to have pluginsync
 #   ['use_srv_records']       - Whethere to use srv records
 #   ['srv_domain']            - Domain to request the srv records
 #   ['ordering']              - The way the agent processes resources. New feature in puppet 3.3.0
@@ -88,7 +87,6 @@ class puppet::agent(
   String                                                $classfile              = $::puppet::params::classfile,
   String                                                $puppet_server_port     = $::puppet::params::puppet_server_port,
   Boolean                                               $report                 = true,
-  Boolean                                               $pluginsync             = true,
   Boolean                                               $listen                 = false,
   String                                                $reportserver           = '$server',
   Enum['md5', 'sha256', 'sha384', 'sha512', 'sha224']   $digest_algorithm       = $::puppet::params::digest_algorithm,
@@ -405,12 +403,6 @@ class puppet::agent(
   ini_setting {'puppetagentreport':
     setting => 'report',
     value   => $report,
-  }
-  if ! $puppet_five_support {
-    ini_setting {'puppetagentpluginsync':
-      setting => 'pluginsync',
-      value   => $pluginsync,
-    }
   }
   ini_setting {'puppetagentlisten':
     setting => 'listen',
