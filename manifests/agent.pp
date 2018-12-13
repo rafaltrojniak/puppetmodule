@@ -147,8 +147,6 @@ class puppet::agent(
 
   if $puppet_five_support {
 
-    validate_legacy(Array, 'validate_array', $agent_gems)
-
     if $agent_gems != [] {
 
       package { $agent_gems:
