@@ -4,17 +4,16 @@
 #
 #
 class puppet::mcollective::facts (
-  $run_every = 'unknown',
-  $legacy    = true,
+  Optional[Integer]   $run_every = undef,
+  Boolean             $legacy    = true,
 )
 inherits puppet::mcollective {
 
   # if they passed in Hiera value use that.
-  $enable = $run_every ? {
-    'unknown' => 'absent',
-    undef     => 'absent',
-    ''        => 'absent',
-    default   => 'present',
+  if $run_every {
+    $enable = 'present'
+  } else {
+    $enable = 'absent'
   }
 
   # Define the minute to be all if runevery wasn't defined
