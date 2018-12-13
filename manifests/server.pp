@@ -59,7 +59,7 @@ class puppet::server (
   Boolean                                               $autosign                      = false,
   Boolean                                               $ca                            = false,
   String                                                $ca_ttl                        = '315360000',
-  String                                                $reporturl                     = undef,
+  Optional[String]                                      $reporturl                     = undef,
   String                                                $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
   String                                                $puppet_vardir                 = $::puppet::params::puppet_vardir,
   String                                                $puppet_server_package         = $::puppet::params::puppet_server_package,
