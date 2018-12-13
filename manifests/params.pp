@@ -16,7 +16,6 @@ class puppet::params {
   $puppet_user                      = 'puppet'
   $puppet_group                     = 'puppet'
   $certname                         = $::fqdn
-  $puppet_docroot                   = '/etc/puppet/rack/public/'
   $puppet_server_port               = '8140'
   $parser                           = 'current'
   $digest_algorithm                 = 'md5'
