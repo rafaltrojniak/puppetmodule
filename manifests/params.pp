@@ -24,6 +24,12 @@ class puppet::params {
   $package_provider                 = undef # falls back to system default
   $puppet_server_service_enable     = true
 
+  $confdir                          = '/etc/puppetlabs/puppet'
+  $hiera_config                     = "${confdir}/hiera.yaml"
+  $codedir                          = '/etc/puppetlabs/code'
+  $modulepath                       = "${codedir}/modules"
+  $manifest                         = "${codedir}/manifests"
+  $environmentpath                  = "${codedir}/environments"
 
   # Puppet 5 #
 
@@ -43,22 +49,6 @@ class puppet::params {
 
   }
 
-  if $puppet_five_support {
-    $confdir                        = '/etc/puppetlabs/puppet'
-    $hiera_config                   = "${confdir}/hiera.yaml"
-    $codedir                        = '/etc/puppetlabs/code'
-    $modulepath                     = "${codedir}/modules"
-    $manifest                       = "${codedir}/manifests"
-    $environmentpath                = "${codedir}/environments"
-  } else {
-    $confdir                        = '/etc/puppet'
-    $hiera_config                   = '/etc/puppet/hiera.yaml'
-    $modulepath                     = '/etc/puppet/modules'
-    $manifest                       = '/etc/puppet/manifests/site.pp'
-    $environments                   = 'config'
-    # Only used when environments == directory
-    $environmentpath                = "${confdir}/environments"
-  }
 
   # Mcollective #
 
@@ -101,15 +91,8 @@ class puppet::params {
       $puppet_server_conf_d         = "${puppet_server_confdir}/conf.d"
       $puppet_server_services_d     = "${puppet_server_confdir}/services.d"
       $puppet_server_defaults       = "/etc/default/puppetserver"
-
-      if $puppet_five_support {
-        $puppet_vardir              = '/opt/puppetlabs/puppet/cache'
-        $puppet_ssldir              = '/etc/puppetlabs/puppet/ssl'
-      } else {
-        $puppet_vardir              = '/var/lib/puppet'
-        $puppet_ssldir              = '/var/lib/puppet/ssl'
-      }
-
+      $puppet_vardir                = '/opt/puppetlabs/puppet/cache'
+      $puppet_ssldir                = '/etc/puppetlabs/puppet/ssl'
     }
     'FreeBSD': {
       $puppet_agent_service         = 'puppet'
