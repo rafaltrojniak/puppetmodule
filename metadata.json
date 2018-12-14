@@ -1,6 +1,10 @@
 {
   "name": "ocadotechnology-puppet",
   "version": "2.0.0",
+  "author": [
+    "Stephen Johnson",
+    "Justin Cattle"
+  ],
   "summary": "Resource types for managing puppet master and agent",
   "license": "APSL-2.0",
   "source": "git://github.com/ocadotechnology/puppetmodule.git",
