@@ -15,24 +15,14 @@ class puppet::params {
   $puppet_server                    = 'puppet'
   $puppet_user                      = 'puppet'
   $puppet_group                     = 'puppet'
-  $storeconfigs_dbserver            = $::fqdn
-  $storeconfigs_dbport              = '8081'
   $certname                         = $::fqdn
-  $puppet_docroot                   = '/etc/puppet/rack/public/'
-  $puppet_passenger_port            = '8140'
   $puppet_server_port               = '8140'
-  $puppet_agent_enabled             = true
-  $apache_serveradmin               = 'root'
   $parser                           = 'current'
-  $puppetdb_strict_validation       = true
   $digest_algorithm                 = 'md5'
   $puppet_run_interval              = 30
   $classfile                        = '$statedir/classes.txt'
   $package_provider                 = undef # falls back to system default
   $puppet_server_service_enable     = true
-
-  $puppet_passenger_ssl_protocol    = 'TLSv1.2'
-  $puppet_passenger_ssl_cipher      = 'AES256+EECDH:AES256+EDH'
 
 
   # Puppet 5 #
@@ -84,39 +74,27 @@ class puppet::params {
 
   case $::osfamily {
     'RedHat': {
-      $puppet_master_package        = 'puppet-server'
-      $puppet_master_service        = 'puppetmaster'
       $puppet_agent_service         = 'puppet'
       $puppet_agent_package         = 'puppet'
       $puppet_defaults              = '/etc/sysconfig/puppet'
       $puppet_conf                  = '/etc/puppet/puppet.conf'
       $puppet_vardir                = '/var/lib/puppet'
       $puppet_ssldir                = '/var/lib/puppet/ssl'
-      $passenger_package            = 'mod_passenger'
-      $rack_package                 = 'rubygem-rack'
       $ruby_dev                     = 'ruby-devel'
     }
     'Suse': {
-      $puppet_master_package        = 'puppet-server'
-      $puppet_master_service        = 'puppetmasterd'
       $puppet_agent_service         = 'puppet'
       $puppet_agent_package         = 'puppet'
       $puppet_conf                  = '/etc/puppet/puppet.conf'
       $puppet_vardir                = '/var/lib/puppet'
       $puppet_ssldir                = '/var/lib/puppet/ssl'
-      $passenger_package            = 'rubygem-passenger-apache2'
-      $rack_package                 = 'rubygem-rack'
     }
     'Debian': {
-      $puppet_master_package        = 'puppetmaster'
-      $puppet_master_service        = 'puppetmaster'
       $puppet_server_package        = 'puppetserver'
       $puppet_server_service        = 'puppetserver'
       $puppet_agent_service         = 'puppet'
       $puppet_agent_package         = 'puppet'
       $puppet_defaults              = '/etc/default/puppet'
-      $passenger_package            = 'libapache2-mod-passenger'
-      $rack_package                 = 'librack-ruby'
       $ruby_dev                     = 'ruby-dev'
       $puppet_conf                  = "${confdir}/puppet.conf"
       $puppet_server_confdir        = '/etc/puppetlabs/puppetserver'

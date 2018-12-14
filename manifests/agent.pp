@@ -20,17 +20,13 @@
 #   ['logdir']                - The directory in which to store log files
 #   ['environment']           - The environment of the puppet agent
 #   ['report']                - Whether to return reports
-#   ['pluginsync']            - Whethere to have pluginsync
 #   ['use_srv_records']       - Whethere to use srv records
 #   ['srv_domain']            - Domain to request the srv records
 #   ['ordering']              - The way the agent processes resources. New feature in puppet 3.3.0
-#   ['trusted_node_data']     - Enable the trusted facts hash
 #   ['listen']                - If puppet agent should listen for connections
 #   ['reportserver']          - The server to send transaction reports to.
 #   ['digest_algorithm']      - The algorithm to use for file digests.
 #   ['templatedir']           - Template dir, if unset it will remove the setting.
-#   ['configtimeout']         - How long the client should wait for the configuration to be retrieved before considering it a failure
-#   ['stringify_facts']       - Wether puppet transforms structured facts in strings or no. Defaults to true in puppet < 4, deprecated in puppet >=4 (and will default to false)
 #   ['cron_hour']             - What hour to run if puppet_run_style is cron
 #   ['cron_minute']           - What minute to run if puppet_run_style is cron
 #   ['serialization_format']  - defaults to undef, otherwise it sets the preferred_serialization_format param (currently only msgpack is supported)
@@ -56,76 +52,61 @@
 #   }
 #
 class puppet::agent(
-  $puppet_agent_service   = $::puppet::params::puppet_agent_service,
-  $puppet_agent_package   = $::puppet::params::puppet_agent_package,
-  $version                = 'present',
-  $puppet_run_style       = 'service',
-  $puppet_run_command     = '/usr/bin/puppet agent --no-daemonize --onetime --logdest syslog > /dev/null 2>&1',
-  $user_id                = undef,
-  $group_id               = undef,
-  $package_provider       = $::puppet::params::package_provider,
-  $confdir                = $::puppet::params::confdir,
-  $puppet_conf            = $::puppet::params::puppet_conf,
-  $environmentpath        = $::puppet::params::environmentpath,
+  String                                                $puppet_agent_service   = $::puppet::params::puppet_agent_service,
+  String                                                $puppet_agent_package   = $::puppet::params::puppet_agent_package,
+  String                                                $version                = 'present',
+  Enum['service', 'cron', 'external', 'manual']         $puppet_run_style       = 'service',
+  String                                                $puppet_run_command     = '/usr/bin/puppet agent --no-daemonize --onetime --logdest syslog > /dev/null 2>&1',
+  Optional[Integer]                                     $user_id                = undef,
+  Optional[Integer]                                     $group_id               = undef,
+  Optional[String]                                      $package_provider       = $::puppet::params::package_provider,
+  String                                                $confdir                = $::puppet::params::confdir,
+  String                                                $puppet_conf            = $::puppet::params::puppet_conf,
+  String                                                $environmentpath        = $::puppet::params::environmentpath,
 
-  $puppet_five_support    = $::puppet::params::puppet_five_support,
+  Boolean                                               $puppet_five_support    = $::puppet::params::puppet_five_support,
 
   #[main]
-  $templatedir            = undef,
-  $syslogfacility         = undef,
-  $priority               = undef,
-  $logdir                 = undef,
+  Optional[String]                                      $templatedir            = undef,
+  Optional[String]                                      $syslogfacility         = undef,
+  Optional[String]                                      $priority               = undef,
+  Optional[String]                                      $logdir                 = undef,
 
   #[agent]
-  $srv_domain             = undef,
-  $ordering               = undef,
-  $trusted_node_data      = undef,
-  $environment            = 'production',
-  $puppet_server          = $::puppet::params::puppet_server,
-  $use_srv_records        = false,
-  $puppet_run_interval    = $::puppet::params::puppet_run_interval,
-  $splay                  = false,
+  Optional[String]                                      $srv_domain             = undef,
+  Optional[Enum['manifest', 'title-hash', 'random']]    $ordering               = undef,
+  String                                                $environment            = 'production',
+  String                                                $puppet_server          = $::puppet::params::puppet_server,
+  Boolean                                               $use_srv_records        = false,
+  Variant[String, Integer]                              $puppet_run_interval    = $::puppet::params::puppet_run_interval,
+  Boolean                                               $splay                  = false,
 
   # $splaylimit defaults to $runinterval per Puppetlabs docs:  
   # http://docs.puppetlabs.com/references/latest/configuration.html#splaylimit
-  $splaylimit             = $::puppet::params::puppet_run_interval,
-  $classfile              = $::puppet::params::classfile,
-  $puppet_server_port     = $::puppet::params::puppet_server_port,
-  $report                 = true,
-  $pluginsync             = true,
-  $listen                 = false,
-  $reportserver           = '$server',
-  $digest_algorithm       = $::puppet::params::digest_algorithm,
-  $http_connect_timeout   = '2m',
-  $http_read_timeout      = '2m',
-  $stringify_facts        = undef,
-  $verbose                = undef,
-  $agent_noop             = undef,
-  $usecacheonfailure      = undef,
-  $certname               = undef,
-  $http_proxy_host        = undef,
-  $http_proxy_port        = undef,
-  $cron_hour              = '*',
-  $cron_minute            = undef,
-  $serialization_format   = undef,
-  $serialization_package  = undef,
+  Variant[String, Integer]                              $splaylimit             = $::puppet::params::puppet_run_interval,
+  String                                                $classfile              = $::puppet::params::classfile,
+  String                                                $puppet_server_port     = $::puppet::params::puppet_server_port,
+  Boolean                                               $report                 = true,
+  Boolean                                               $listen                 = false,
+  String                                                $reportserver           = '$server',
+  Enum['md5', 'sha256', 'sha384', 'sha512', 'sha224']   $digest_algorithm       = $::puppet::params::digest_algorithm,
+  String                                                $http_connect_timeout   = '2m',
+  String                                                $http_read_timeout      = '2m',
+  Optional[Boolean]                                     $usecacheonfailure      = undef,
+  Optional[String]                                      $certname               = undef,
+  Optional[String]                                      $http_proxy_host        = undef,
+  Optional[String]                                      $http_proxy_port        = undef,
+  String                                                $cron_hour              = '*',
+  Optional[String]                                      $cron_minute            = undef,
+  Optional[Enum['msgpack']]                             $serialization_format   = undef,
+  Optional[String]                                      $serialization_package  = undef,
 
-  $local_ssl_certs_trust  = true,
+  Boolean                                               $local_ssl_certs_trust  = true,
 
-  $agent_gems                 = [],
-  $agent_gems_install_options = undef,
+  Array[String]                                         $agent_gems                 = [],
+  Variant[Array[String], Array[Hash], Hash, Undef]      $agent_gems_install_options = undef,
 
-  # deprectated in puppet 5 #
-  $configtimeout          = undef,
 ) inherits puppet::params {
-
-
-  # Deprecated warnings #
-  if $configtimeout {
-    notify {'puppet config option "configtimeout" is deprecated and will be ignored. Consider "http_connect_timeout" and "http_read_timeout" instead':
-      loglevel => 'warning',
-    }
-  }
 
 
   if ! defined(User[$::puppet::params::puppet_user]) {
@@ -153,64 +134,53 @@ class puppet::agent(
   }
 
   # Compatibility #
-  if $puppet_five_support {
-
-    file {'/usr/bin/puppet':
-      ensure  => link,
-      target  => '/opt/puppetlabs/bin/puppet',
-      replace => true,
-      require => Package[$puppet_agent_package],
-    }
-
+  file {'/usr/bin/puppet':
+    ensure  => link,
+    target  => '/opt/puppetlabs/bin/puppet',
+    replace => true,
+    require => Package[$puppet_agent_package],
   }
 
-  if $puppet_five_support {
 
-    validate_legacy(Array, 'validate_array', $agent_gems)
+  # Agent Gems #
+  if $agent_gems != [] {
 
-    if $agent_gems != [] {
-
-      package { $agent_gems:
-        ensure          => installed,
-        provider        => 'puppet_gem',
-        install_options => $agent_gems_install_options,
-        require         => Package[$puppet_agent_package],
-      }
-
+    package { $agent_gems:
+      ensure          => installed,
+      provider        => 'puppet_gem',
+      install_options => $agent_gems_install_options,
+      require         => Package[$puppet_agent_package],
     }
 
   }
 
   # Install local CAs into agent ssl store for trust
-  if $puppet_five_support {
+  # Only supperted on Debian-like atm
+  if $::osfamily == 'Debian' {
 
-    # Only supperted on Debian-like atm
-    if $::osfamily == 'Debian' {
-
-      if $local_ssl_certs_trust {
+    if $local_ssl_certs_trust {
 
 
-        file {'/opt/puppetlabs/puppet/ssl/local_ssl_certs.signature':
-          ensure  => present,
-          owner   => 'root',
-          group   => 'root',
-          mode    => '0400',
-          content => template("puppet/local_ssl_certs.signature.erb"),
-          notify  => Exec['local_ssl_certs_trust'],
-          require => [Package[$puppet_agent_package],Package[ca-certificates]],
-       }
+      file {'/opt/puppetlabs/puppet/ssl/local_ssl_certs.signature':
+        ensure  => present,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0400',
+        content => template("puppet/local_ssl_certs.signature.erb"),
+        notify  => Exec['local_ssl_certs_trust'],
+        require => [Package[$puppet_agent_package],Package[ca-certificates]],
+     }
 
-        exec{'local_ssl_certs_trust':
-          command => "/usr/sbin/update-ca-certificates --certsconf /dev/null --localcertsdir /usr/local/share/ca-certificates --etccertsdir /opt/puppetlabs/puppet/ssl/certs",
-          refreshonly => true,
-          provider    => shell,
-        }
-
+      exec{'local_ssl_certs_trust':
+        command => "/usr/sbin/update-ca-certificates --certsconf /dev/null --localcertsdir /usr/local/share/ca-certificates --etccertsdir /opt/puppetlabs/puppet/ssl/certs",
+        refreshonly => true,
+        provider    => shell,
       }
 
     }
 
   }
+
 
   if $puppet_run_style == 'service' {
     $startonboot = 'yes'
@@ -239,25 +209,23 @@ class puppet::agent(
     }
   }
 
-  if $puppet_five_support {
-    # Even tough the catalogue compiles fine without this - it stops the agent throwing a node definition error [ at least on puppet-agent 5.3.4 ] #
-    if ! defined(File[$environmentpath]) {
-      file {$environmentpath:
-        ensure => directory,
-        require => Package[$puppet_agent_package],
-        owner   => $::puppet::params::puppet_user,
-        group   => $::puppet::params::puppet_group,
-        mode   => '0755',
-      }
+  # Even tough the catalogue compiles fine without this - it stops the agent throwing a node definition error [ at least on puppet-agent 5.3.4 ] #
+  if ! defined(File[$environmentpath]) {
+    file {$environmentpath:
+      ensure => directory,
+      require => Package[$puppet_agent_package],
+      owner   => $::puppet::params::puppet_user,
+      group   => $::puppet::params::puppet_group,
+      mode   => '0755',
     }
-    if ! defined(File["${environmentpath}/${environment}"]) {
-      file {"${environmentpath}/${environment}":
-        ensure  => directory,
-        owner   => $::puppet::params::puppet_user,
-        group   => $::puppet::params::puppet_group,
-        mode    => '0755',
-        require => [Package[$puppet_agent_package],File[$environmentpath]],
-      }
+  }
+  if ! defined(File["${environmentpath}/${environment}"]) {
+    file {"${environmentpath}/${environment}":
+      ensure  => directory,
+      owner   => $::puppet::params::puppet_user,
+      group   => $::puppet::params::puppet_group,
+      mode    => '0755',
+      require => [Package[$puppet_agent_package],File[$environmentpath]],
     }
   }
 
@@ -294,7 +262,7 @@ class puppet::agent(
       $service_enable = false
     }
     # Do not manage the Puppet service and don't touch Debian's defaults file.
-    manual: {
+    'manual': {
       $service_ensure = undef
       $service_enable = undef
     }
@@ -377,17 +345,6 @@ class puppet::agent(
     setting => 'ordering',
     value   => $ordering,
   }
-  if $trusted_node_data != undef
-  {
-    $trusted_node_data_ensure = 'present'
-  }else {
-    $trusted_node_data_ensure = 'absent'
-  }
-  ini_setting {'puppetagenttrusted_node_data':
-    ensure  => $trusted_node_data_ensure,
-    setting => 'trusted_node_data',
-    value   => $trusted_node_data,
-  }
 
   ini_setting {'puppetagentenvironment':
     setting => 'environment',
@@ -434,12 +391,6 @@ class puppet::agent(
     setting => 'report',
     value   => $report,
   }
-  if ! $puppet_five_support {
-    ini_setting {'puppetagentpluginsync':
-      setting => 'pluginsync',
-      value   => $pluginsync,
-    }
-  }
   ini_setting {'puppetagentlisten':
     setting => 'listen',
     value   => $listen,
@@ -468,45 +419,17 @@ class puppet::agent(
       section => 'main',
     }
   }
-  if $puppet_five_support {
-    ini_setting {'puppetagentconfigtimeout':
-      ensure  => absent,
-      setting => 'configtimeout',
-    }
-    ini_setting {'puppetagenthttp_connect_timeout':
-      setting => 'http_connect_timeout',
-      value   => $http_connect_timeout,
-    }
-    ini_setting {'puppetagenthttp_read_timeout':
-      setting => 'http_read_timeout',
-      value   => $http_read_timeout,
-    }
-  } else {
-    ini_setting {'puppetagentconfigtimeout':
-      setting => 'configtimeout',
-      value   => $configtimeout,
-    }
+
+  # Agent timeout settings #
+  ini_setting {'puppetagenthttp_connect_timeout':
+    setting => 'http_connect_timeout',
+    value   => $http_connect_timeout,
   }
-  if $stringify_facts != undef {
-    ini_setting {'puppetagentstringifyfacts':
-      setting => 'stringify_facts',
-      value   => $stringify_facts,
-    }
+  ini_setting {'puppetagenthttp_read_timeout':
+    setting => 'http_read_timeout',
+    value   => $http_read_timeout,
   }
-  if $verbose != undef {
-    ini_setting {'puppetagentverbose':
-      ensure  => present,
-      setting => 'verbose',
-      value   => $verbose,
-    }
-  }
-  if $agent_noop != undef {
-    ini_setting {'puppetagentnoop':
-      ensure  => present,
-      setting => 'noop',
-      value   => $agent_noop,
-    }
-  }
+
   if $usecacheonfailure != undef {
     ini_setting {'puppetagentusecacheonfailure':
       ensure  => present,

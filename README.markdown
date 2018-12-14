@@ -1,11 +1,8 @@
-[![Build Status](https://travis-ci.org/stephenrjohnson/puppetmodule.png)](https://travis-ci.org/stephenrjohnson/puppetmodule)
 # Puppet module #
 
-This module provides classes for managing the puppet agent and puppet master. 
-It will setup passenger and apache on the puppetmaster. Please note this will 
-not setup puppetdb. This can be configured using the puppetdb module 
-http://forge.puppetlabs.com/puppetlabs/puppetdb. Storedconfigs with puppetdb 
-will only work on puppet versions newer than 2.7.12.
+This module provides classes for managing the puppet agent and puppet server.
+Please note this will not setup puppetdb.
+will only work on puppet versions newer than 5.5.0
 
 ## Prerequisites ##
 If you are using a RedHat based OS you also need to have the EPEL repo configured
@@ -13,58 +10,34 @@ as this module requires the passenger apache module.
 
 Requires the following modules from puppetforge: [stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib), [apache](https://forge.puppetlabs.com/puppetlabs/apache), [concat](https://forge.puppetlabs.com/puppetlabs/concat), [inifile](https://forge.puppetlabs.com/puppetlabs/inifile)
 
-## Usage Note ##
 
-If you are using this module to install a puppetmaster and serving the manifest of 
-the machine. You may have issues with it halting the puppet master if it is 
-running through webrick. In which case run a single puppet run using
+## Server ##
 
-    puppet apply -e "class{'puppet::repo::puppetlabs': } Class['puppet::repo::puppetlabs'] -> Package <| |> class { 'puppetdb': }  class { 'puppet::master': storeconfigs => true }"
+  class { 'puppet::server':
+    autosign       => true,
+    certname       => 'puppet.some.domain.name'
+    external_nodes => '/etc/puppetlabs/puppet/enc.sh',
+  }
 
-## Master ##
-    class { 'puppetdb': }
-    class { 'puppet::master':
-        storeconfigs              => true,
-    }
 
 ## Puppet Environments ##
 
-Puppet 3.5 introduced a new way of handling Puppet environments known as _Directory Environments_.  This is expected to become the default configuration as of Puppet 4.0, this module supports both methods.
-
-### Config Method (default) ###
-
-    class { 'puppet::master': }
-
-    puppet::masterenv {'dev':
-        modulepath => '/etc/puppet/env/dev/modules',
-        manifest   => '/etc/puppet/env/dev/site.pp',
-    }
-    puppet::masterenv {'production':
-        modulepath => '/etc/puppet/env/production/modules',
-        manifest   => '/etc/puppet/env/production/site.pp',
-    }
-
-### Directory method using _environmentpath_ ###
-
-    class { 'puppet::master':
-      environments => 'directory',
-    }
-
-Optionally, an `environmentpath` parameter can be supplied to configure the base root of Puppet environments, this defaults to `$confdir/environments`
+Puppet supports _Directory Environments_ only.
 
 
 ## Agent ##
-    class { 'puppet::agent':
-        puppet_server             => master.puppetlabs.vm,
-        environment               => production,
-        splay                     => true,
-    }
 
-## Deprecation Warning ##
+  class { 'puppet::agent':
+    puppet_server => master.puppetlabs.vm,
+    environment   => production,
+    splay         => true,
+  }
 
-The `templatedir` parameter will default to `undef` and will remove the setting from the puppet.conf file in version 2.0.0 of this module.
 
 ## Testing ##
+
+Testing is out of date, and hence will fail.
+The below instructions worked as of when it was last updated.
 
 Install gems:
 

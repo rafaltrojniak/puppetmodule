@@ -77,42 +77,42 @@
 class puppet::mcollective (
 
   # Package and Service defaults that are OS-specific, can override in Hiera
-  String                                            $package                        = 'puppet-agent',
-  String                                            $service                        = $::puppet::params::mcollective_service_name,
-  String                                            $etcdir                         = $::puppet::params::mcollective_etcdir,
-  String                                            $libdir                         = $::puppet::params::mcollective_libdir,
-  String                                            $logfile                        = $::puppet::params::mcollective_logfile,
-  String                                            $classesfile                    = $::puppet::params::mcollective_classesfile,
-  String                                            $ssldir                         = $::puppet::params::puppet_ssldir,
+  String                                         $package                        = 'puppet-agent',
+  String                                         $service                        = $::puppet::params::mcollective_service_name,
+  String                                         $etcdir                         = $::puppet::params::mcollective_etcdir,
+  String                                         $libdir                         = $::puppet::params::mcollective_libdir,
+  String                                         $logfile                        = $::puppet::params::mcollective_logfile,
+  String                                         $classesfile                    = $::puppet::params::mcollective_classesfile,
+  String                                         $ssldir                         = $::puppet::params::puppet_ssldir,
 
   # Hosts and collectives
-  Array $hosts,
-  Array                                             $collectives                    = ['mcollective'],
+  Array                                          $hosts,
+  Array                                          $collectives                    = ['mcollective'],
 
 
   # Authorization
-  String                                            $server_user                    = 'server',
-  Optional[String]                                  $server_password                = undef,
-  String                                            $client_user                    = 'client',
-  Optional[String]                                  $client_password                = undef,
-  String                                            $broker_user                    = 'admin',
-  Optional[String]                                  $broker_password                = undef,
+  String                                         $server_user                    = 'server',
+  Optional[String]                               $server_password                = undef,
+  String                                         $client_user                    = 'client',
+  Optional[String]                               $client_password                = undef,
+  String                                         $broker_user                    = 'admin',
+  Optional[String]                               $broker_password                = undef,
 
-  Enum['psk', 'sshkey', 'ssl', 'aes_security']      $security_provider              = 'psk',
-  Optional[String]                                  $psk_key                        = undef,
-  String                                            $psk_callertype                 = 'uid',
+  Enum['psk', 'sshkey', 'ssl', 'aes_security']   $security_provider              = 'psk',
+  Optional[String]                               $psk_key                        = undef,
+  String                                         $psk_callertype                 = 'uid',
 
   # Connector settings
-  Enum['activemq', 'rabbitmq']                      $connector                      = 'activemq',
-  Boolean                                           $connector_ssl                  = false,
-  String                                            $connector_ssl_type             = 'anonymous',
-  Optional[Integer]                                 $port                           = undef,
-  Boolean                                           $activemq_base64                = false,
+  Enum['activemq', 'rabbitmq']                   $connector                      = 'activemq',
+  Boolean                                        $connector_ssl                  = false,
+  String                                         $connector_ssl_type             = 'anonymous',
+  Optional[Integer]                              $port                           = undef,
+  Boolean                                        $activemq_base64                = false,
 
-  Integer                                           $registerinterval               = 600,
+  Integer                                        $registerinterval               = 600,
 
   # Optional files distribution
-  Optional[String]                                  $site_module                    = undef,
+  Optional[String]                               $site_module                    = undef,
 
 ) inherits puppet::params {
 

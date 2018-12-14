@@ -19,7 +19,6 @@
 #  ['ca_ttl']                   - Cert expirery ttl - defaulting to 10 years [ 315360000 secs ]
 #  ['reporturl']                - Url to send reports to, if reporting enabled
 #  ['puppet_ssldir']            - Puppet sll directory
-#  ['puppet_docroot']           - Doc root to be configured in apache vhost
 #  ['puppet_vardir']            - Vardir used by puppet
 #  ['puppet_server_package']    - Puppet server package
 #  ['puppet_server_service']    - Puppet server service
@@ -30,7 +29,7 @@
 #  ['digest_algorithm']         - The algorithm to use for file digests.
 #  ['strict_variables']         - Makes the parser raise errors when referencing unknown variables
 #  ['serialization_format']     - defaults to undef [ which means JSON/PSON ], otherwise it sets the preferred_serialization_format param (currently only msgpack is supported)
-#  ['file_server_mounts']       - A n array of hashes describing puppet file server mounts, hashes must include keys, 'name', 'path, and optionally 'desc'. Defaults to undef, which removes config.
+#  ['file_server_mounts']       - An array of hashes describing puppet file server mounts, hashes must include keys, 'name', 'path, and optionally 'desc'. Defaults to undef, which removes the config.
 #
 # Notes:
 #
@@ -43,42 +42,43 @@
 #
 #
 class puppet::server (
-  $user_id                       = $::puppet_user_uid,
-  $group_id                      = $::puppet_user_gid,
-  $puppet_user                   = $::puppet::params::puppet_user,
-  $puppet_group                  = $::puppet::params::puppet_group,
-  $confdir                       = $::puppet::params::confdir,
-  $puppet_conf                   = $::puppet::params::puppet_conf,
-  $modulepath                    = $::puppet::params::modulepath,
-  $manifest                      = $::puppet::params::manifest,
-  $external_nodes                = undef,
-  $node_terminus                 = undef,
-  $hiera_config                  = $::puppet::params::hiera_config,
-  $environmentpath               = $::puppet::params::environmentpath,
-  $reports                       = store,
-  $certname                      = $::fqdn,
-  $autosign                      = false,
-  $ca                            = false,
-  $ca_ttl                        = '315360000',
-  $reporturl                     = undef,
-  $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
-  $puppet_docroot                = $::puppet::params::puppet_docroot,
-  $puppet_vardir                 = $::puppet::params::puppet_vardir,
-  $puppet_server_package         = $::puppet::params::puppet_server_package,
-  $puppet_server_service         = $::puppet::params::puppet_server_service,
-  $puppet_server_service_enable  = $::puppet::params::puppet_server_service_enable,
-  $puppet_server_service_requires = [],
-  $puppet_server_defaults        = $::puppet::params::puppet_server_defaults,
-  $puppet_server_confdir         = $::puppet::params::puppet_server_confdir,
-  $puppet_server_conf_d          = $::puppet::params::puppet_server_conf_d,
-  $puppet_server_services_d      = $::puppet::params::puppet_server_services_d,
-  $java_heap                     = '-Xms1g -Xmx1g',
-  $version                       = 'present',
-  $dns_alt_names                 = ['puppet'],
-  $digest_algorithm              = $::puppet::params::digest_algorithm,
-  $strict_variables              = undef,
-  $serialization_format          = undef,
+  String                                                $user_id                       = $::puppet_user_uid,
+  String                                                $group_id                      = $::puppet_user_gid,
+  String                                                $puppet_user                   = $::puppet::params::puppet_user,
+  String                                                $puppet_group                  = $::puppet::params::puppet_group,
+  String                                                $confdir                       = $::puppet::params::confdir,
+  String                                                $puppet_conf                   = $::puppet::params::puppet_conf,
+  String                                                $modulepath                    = $::puppet::params::modulepath,
+  String                                                $manifest                      = $::puppet::params::manifest,
+  Optional[String]                                      $external_nodes                = undef,
+  Optional[Enum['plain', 'exec', 'classifier']]         $node_terminus                 = undef,
+  String                                                $hiera_config                  = $::puppet::params::hiera_config,
+  String                                                $environmentpath               = $::puppet::params::environmentpath,
+  String                                                $reports                       = 'store',
+  String                                                $certname                      = $::fqdn,
+  Boolean                                               $autosign                      = false,
+  Boolean                                               $ca                            = false,
+  String                                                $ca_ttl                        = '315360000',
+  Optional[String]                                      $reporturl                     = undef,
+  String                                                $puppet_ssldir                 = $::puppet::params::puppet_ssldir,
+  String                                                $puppet_vardir                 = $::puppet::params::puppet_vardir,
+  String                                                $puppet_server_package         = $::puppet::params::puppet_server_package,
+  String                                                $puppet_server_service         = $::puppet::params::puppet_server_service,
+  Boolean                                               $puppet_server_service_enable  = $::puppet::params::puppet_server_service_enable,
+  Array[String]                                         $puppet_server_service_requires = [],
+  String                                                $puppet_server_defaults        = $::puppet::params::puppet_server_defaults,
+  String                                                $puppet_server_confdir         = $::puppet::params::puppet_server_confdir,
+  String                                                $puppet_server_conf_d          = $::puppet::params::puppet_server_conf_d,
+  String                                                $puppet_server_services_d      = $::puppet::params::puppet_server_services_d,
+  String                                                $java_heap                     = '-Xms1g -Xmx1g',
+  String                                                $version                       = 'present',
+  Array[String]                                         $dns_alt_names                 = ['puppet'],
+  Enum['md5', 'sha256', 'sha384', 'sha512', 'sha224']   $digest_algorithm              = $::puppet::params::digest_algorithm,
+  Optional[Boolean]                                     $strict_variables              = undef,
+  Optional[Enum['msgpack']]                             $serialization_format          = undef,
+
   Optional[ Array[ Struct[ { name => String , path => String , Optional[desc] => String } ]]]   $file_server_mounts = undef,
+
 ) inherits puppet::params {
 
   anchor { 'puppet::server::begin': }
