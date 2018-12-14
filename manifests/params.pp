@@ -24,12 +24,6 @@ class puppet::params {
   $package_provider                 = undef # falls back to system default
   $puppet_server_service_enable     = true
 
-  $confdir                          = '/etc/puppetlabs/puppet'
-  $hiera_config                     = "${confdir}/hiera.yaml"
-  $codedir                          = '/etc/puppetlabs/code'
-  $modulepath                       = "${codedir}/modules"
-  $manifest                         = "${codedir}/manifests"
-  $environmentpath                  = "${codedir}/environments"
 
   # Puppet 5 #
 
@@ -48,6 +42,15 @@ class puppet::params {
     $puppet_five_support = true
 
   }
+
+
+  # Config locations #
+  $confdir                          = '/etc/puppetlabs/puppet'
+  $hiera_config                     = "${confdir}/hiera.yaml"
+  $codedir                          = '/etc/puppetlabs/code'
+  $modulepath                       = "${codedir}/modules"
+  $manifest                         = "${codedir}/manifests"
+  $environmentpath                  = "${codedir}/environments"
 
 
   # Mcollective #
