@@ -43,22 +43,15 @@ class puppet::params {
 
   }
 
-  if $puppet_five_support {
-    $confdir                        = '/etc/puppetlabs/puppet'
-    $hiera_config                   = "${confdir}/hiera.yaml"
-    $codedir                        = '/etc/puppetlabs/code'
-    $modulepath                     = "${codedir}/modules"
-    $manifest                       = "${codedir}/manifests"
-    $environmentpath                = "${codedir}/environments"
-  } else {
-    $confdir                        = '/etc/puppet'
-    $hiera_config                   = '/etc/puppet/hiera.yaml'
-    $modulepath                     = '/etc/puppet/modules'
-    $manifest                       = '/etc/puppet/manifests/site.pp'
-    $environments                   = 'config'
-    # Only used when environments == directory
-    $environmentpath                = "${confdir}/environments"
-  }
+
+  # Config locations #
+  $confdir                          = '/etc/puppetlabs/puppet'
+  $hiera_config                     = "${confdir}/hiera.yaml"
+  $codedir                          = '/etc/puppetlabs/code'
+  $modulepath                       = "${codedir}/modules"
+  $manifest                         = "${codedir}/manifests"
+  $environmentpath                  = "${codedir}/environments"
+
 
   # Mcollective #
 
@@ -73,22 +66,6 @@ class puppet::params {
   # Distro specific #
 
   case $::osfamily {
-    'RedHat': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_defaults              = '/etc/sysconfig/puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/var/lib/puppet/ssl'
-      $ruby_dev                     = 'ruby-devel'
-    }
-    'Suse': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/var/lib/puppet/ssl'
-    }
     'Debian': {
       $puppet_server_package        = 'puppetserver'
       $puppet_server_service        = 'puppetserver'
@@ -101,29 +78,8 @@ class puppet::params {
       $puppet_server_conf_d         = "${puppet_server_confdir}/conf.d"
       $puppet_server_services_d     = "${puppet_server_confdir}/services.d"
       $puppet_server_defaults       = "/etc/default/puppetserver"
-
-      if $puppet_five_support {
-        $puppet_vardir              = '/opt/puppetlabs/puppet/cache'
-        $puppet_ssldir              = '/etc/puppetlabs/puppet/ssl'
-      } else {
-        $puppet_vardir              = '/var/lib/puppet'
-        $puppet_ssldir              = '/var/lib/puppet/ssl'
-      }
-
-    }
-    'FreeBSD': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'sysutils/puppet'
-      $puppet_conf                  = '/usr/local/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/puppet'
-      $puppet_ssldir                = '/var/puppet/ssl'
-    }
-    'Darwin': {
-      $puppet_agent_service         = 'com.puppetlabs.puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/etc/puppet/ssl'
+      $puppet_vardir                = '/opt/puppetlabs/puppet/cache'
+      $puppet_ssldir                = '/etc/puppetlabs/puppet/ssl'
     }
     default: {
       err('The Puppet module does not support your os')
