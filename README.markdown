@@ -1,6 +1,6 @@
 # Puppet module #
 
-This module provides classes for managing the puppet agent and puppet server. 
+This module provides classes for managing the puppet agent and puppet server.
 Please note this will not setup puppetdb.
 will only work on puppet versions newer than 5.5.0
 
