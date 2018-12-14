@@ -66,22 +66,6 @@ class puppet::params {
   # Distro specific #
 
   case $::osfamily {
-    'RedHat': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_defaults              = '/etc/sysconfig/puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/var/lib/puppet/ssl'
-      $ruby_dev                     = 'ruby-devel'
-    }
-    'Suse': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/var/lib/puppet/ssl'
-    }
     'Debian': {
       $puppet_server_package        = 'puppetserver'
       $puppet_server_service        = 'puppetserver'
@@ -96,20 +80,6 @@ class puppet::params {
       $puppet_server_defaults       = "/etc/default/puppetserver"
       $puppet_vardir                = '/opt/puppetlabs/puppet/cache'
       $puppet_ssldir                = '/etc/puppetlabs/puppet/ssl'
-    }
-    'FreeBSD': {
-      $puppet_agent_service         = 'puppet'
-      $puppet_agent_package         = 'sysutils/puppet'
-      $puppet_conf                  = '/usr/local/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/puppet'
-      $puppet_ssldir                = '/var/puppet/ssl'
-    }
-    'Darwin': {
-      $puppet_agent_service         = 'com.puppetlabs.puppet'
-      $puppet_agent_package         = 'puppet'
-      $puppet_conf                  = '/etc/puppet/puppet.conf'
-      $puppet_vardir                = '/var/lib/puppet'
-      $puppet_ssldir                = '/etc/puppet/ssl'
     }
     default: {
       err('The Puppet module does not support your os')

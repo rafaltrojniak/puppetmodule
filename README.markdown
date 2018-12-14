@@ -5,10 +5,8 @@ Please note this will not setup puppetdb.
 will only work on puppet versions newer than 5.5.0
 
 ## Prerequisites ##
-If you are using a RedHat based OS you also need to have the EPEL repo configured
-as this module requires the passenger apache module.
 
-Requires the following modules from puppetforge: [stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib), [apache](https://forge.puppetlabs.com/puppetlabs/apache), [concat](https://forge.puppetlabs.com/puppetlabs/concat), [inifile](https://forge.puppetlabs.com/puppetlabs/inifile)
+Requires the following modules from puppetforge: [stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib), [concat](https://forge.puppetlabs.com/puppetlabs/concat), [inifile](https://forge.puppetlabs.com/puppetlabs/inifile)
 
 
 ## Server ##
