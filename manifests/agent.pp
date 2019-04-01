@@ -219,15 +219,16 @@ class puppet::agent(
       mode   => '0755',
     }
   }
-  if ! defined(File["${environmentpath}/${environment}"]) {
-    file {"${environmentpath}/${environment}":
-      ensure  => directory,
-      owner   => $::puppet::params::puppet_user,
-      group   => $::puppet::params::puppet_group,
-      mode    => '0755',
-      require => [Package[$puppet_agent_package],File[$environmentpath]],
-    }
-  }
+  # FIXME: this needs probably needs adding again, but doesnt work with production-next env - perhaps a fact to change the behaviour #
+  #if ! defined(File["${environmentpath}/${environment}"]) {
+  #  file {"${environmentpath}/${environment}":
+  #    ensure  => directory,
+  #    owner   => $::puppet::params::puppet_user,
+  #    group   => $::puppet::params::puppet_group,
+  #    mode    => '0755',
+  #    require => [Package[$puppet_agent_package],File[$environmentpath]],
+  #  }
+  #}
 
   case $puppet_run_style {
     'service': {
