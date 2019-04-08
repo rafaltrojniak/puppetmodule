@@ -56,7 +56,7 @@ class puppet::server (
   String                                                $environmentpath               = $::puppet::params::environmentpath,
   String                                                $reports                       = 'store',
   String                                                $certname                      = $::fqdn,
-  Boolean                                               $autosign                      = false,
+  Variant[Boolean, String]                              $autosign                      = false,
   Boolean                                               $ca                            = false,
   String                                                $ca_ttl                        = '315360000',
   Optional[String]                                      $reporturl                     = undef,
