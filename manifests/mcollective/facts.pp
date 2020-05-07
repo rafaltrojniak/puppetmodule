@@ -40,7 +40,7 @@ inherits puppet::mcollective {
 
   cron { 'mcollective-facts':
     ensure      => $enable,
-    command     => "${facter_cmd} 2>/dev/null > ${yamlfile}.new && ! diff -q ${yamlfile}.new ${yamlfile} >/dev/null 2>&1 && mv ${yamlfile}.new ${yamlfile} >/dev/null 2>&1",
+    command     => "flock -n /tmp/facter.lock ${facter_cmd} 2>/dev/null > ${yamlfile}.new && ! diff -q ${yamlfile}.new ${yamlfile} >/dev/null 2>&1 && mv ${yamlfile}.new ${yamlfile} >/dev/null 2>&1",
     minute      => $minute,
   }
 
